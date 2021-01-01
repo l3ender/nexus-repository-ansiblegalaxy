@@ -56,6 +56,13 @@ public class AnsibleGalaxyPathUtilsTest
   public void versionPath() {
     String result = underTest.versionPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/1.2.0")));
+    assertThat(result, is(equalTo("azure/azcollection/1.2.0/version")));
+  }
+
+  @Test
+  public void artifactPath() {
+    String result = underTest.artifactPath(state);
+
+    assertThat(result, is(equalTo("azure/azcollection/1.2.0/artifact")));
   }
 }

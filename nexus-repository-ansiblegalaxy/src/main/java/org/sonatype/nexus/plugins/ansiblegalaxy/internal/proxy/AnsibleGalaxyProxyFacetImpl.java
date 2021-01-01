@@ -13,6 +13,9 @@
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,6 +24,7 @@ import javax.inject.Named;
 
 import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyDataAccess;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils;
 import org.sonatype.nexus.repository.cache.CacheInfo;
@@ -38,6 +42,10 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 
+import com.google.common.base.Strings;
+import com.google.common.io.CharSource;
+import com.google.common.io.CharStreams;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -88,6 +96,8 @@ public class AnsibleGalaxyProxyFacetImpl
         return getAsset(ansiblegalaxyPathUtils.versionListPath(matcherState));
       case VERSION:
         return getAsset(ansiblegalaxyPathUtils.versionPath(matcherState));
+      case ARTIFACT:
+        return getAsset(ansiblegalaxyPathUtils.artifactPath(matcherState));
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -107,8 +117,7 @@ public class AnsibleGalaxyProxyFacetImpl
   @Override
   protected Content store(final Context context, final Content content) throws IOException {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
-    log.info("----- store() assetKind: {}", assetKind.name());
-    log.info("----- store() content: {}", content.toString());
+
     if (assetKind.equals(AssetKind.API_INTERNALS)) {
       return content; // results not stored
     }
@@ -119,6 +128,11 @@ public class AnsibleGalaxyProxyFacetImpl
         return putAsset(content, ansiblegalaxyPathUtils.versionListPath(matcherState), assetKind);
       case VERSION:
         return putAsset(content, ansiblegalaxyPathUtils.versionPath(matcherState), assetKind);
+      case ARTIFACT:
+        AnsibleGalaxyAttributes ansiblegalaxyAttributes =
+            ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState);
+        return putComponent(ansiblegalaxyAttributes, content, ansiblegalaxyPathUtils.artifactPath(matcherState),
+            assetKind);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -130,23 +144,36 @@ public class AnsibleGalaxyProxyFacetImpl
       final AssetKind assetKind) throws IOException
   {
     StorageFacet storageFacet = facet(StorageFacet.class);
-    try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-      return ansiblegalaxyDataAccess.maybeCreateAndSaveAsset(getRepository(), assetPath, assetKind, tempBlob, content);
+    try (InputStream updatedStream = replaceContent(content.openInputStream())) {
+      try (TempBlob tempBlob = storageFacet.createTempBlob(updatedStream, HASH_ALGORITHMS)) {
+        return ansiblegalaxyDataAccess.maybeCreateAndSaveAsset(getRepository(), assetPath, assetKind, tempBlob,
+            content);
+      }
     }
   }
 
-  // private Content putComponent(
-  // final GolangAttributes golangAttributes,
-  // final Content content,
-  // final String assetPath,
-  // final AssetKind assetKind) throws IOException
-  // {
-  // StorageFacet storageFacet = facet(StorageFacet.class);
-  // try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-  // return ansiblegalaxyDataAccess.maybeCreateAndSaveComponent(getRepository(), golangAttributes, assetPath, tempBlob,
-  // content, assetKind);
-  // }
-  // }
+  private InputStream replaceContent(InputStream in) throws IOException {
+    String content =
+        Strings.nullToEmpty(CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8))).trim();
+    String repoAbsoluteUrl = getRepository().getUrl() + "/";
+    String remoteUrl = getRemoteUrl().toString();
+    String replacedContent = content.replaceAll(remoteUrl, repoAbsoluteUrl);
+    log.trace("content replace:\n\t---> old: {}\n\t---> new: {}", content, replacedContent);
+    return new ReaderInputStream(CharSource.wrap(replacedContent).openStream(), StandardCharsets.UTF_8);
+  }
+
+  private Content putComponent(
+      final AnsibleGalaxyAttributes ansibleGalaxyAttributes,
+      final Content content,
+      final String assetPath,
+      final AssetKind assetKind) throws IOException
+  {
+    StorageFacet storageFacet = facet(StorageFacet.class);
+    try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
+      return ansiblegalaxyDataAccess.maybeCreateAndSaveComponent(getRepository(), ansibleGalaxyAttributes, assetPath,
+          tempBlob, content, assetKind);
+    }
+  }
 
   @Override
   protected void indicateVerified(

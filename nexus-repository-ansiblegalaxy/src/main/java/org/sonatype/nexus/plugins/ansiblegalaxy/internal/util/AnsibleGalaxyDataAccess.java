@@ -24,6 +24,7 @@ import org.sonatype.nexus.blobstore.api.Blob;
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.common.hash.HashAlgorithm;
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetBlob;
@@ -43,6 +44,8 @@ import com.google.common.collect.ImmutableList;
 
 import static java.util.Collections.singletonList;
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
+import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_GROUP;
+import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
 
 /**
@@ -52,21 +55,6 @@ import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_
 public class AnsibleGalaxyDataAccess
 {
   public static final List<HashAlgorithm> HASH_ALGORITHMS = ImmutableList.of(HashAlgorithm.SHA1);
-
-  /**
-   * Find a component by its name and tag (version)
-   *
-   * @return found component or null if not found
-   */
-  @Nullable
-  public Component findComponent(final StorageTx tx, final Repository repository, final String assetPath) {
-    Iterable<Component> components =
-        tx.findComponents(Query.builder().where(P_NAME).eq(assetPath).build(), singletonList(repository));
-    if (components.iterator().hasNext()) {
-      return components.iterator().next();
-    }
-    return null;
-  }
 
   /**
    * Find an asset by its name.
@@ -150,5 +138,52 @@ public class AnsibleGalaxyDataAccess
     Content content = new Content(new BlobPayload(blob, asset.requireContentType()));
     Content.extractFromAsset(asset, HASH_ALGORITHMS, content.getAttributes());
     return content;
+  }
+
+  @TransactionalStoreBlob
+  public Content maybeCreateAndSaveComponent(
+      final Repository repository,
+      final AnsibleGalaxyAttributes ansibleGalaxyAttributes,
+      final String assetPath,
+      final TempBlob tempBlob,
+      final Payload payload,
+      final AssetKind assetKind) throws IOException
+  {
+    StorageTx tx = UnitOfWork.currentTx();
+    Bucket bucket = tx.findBucket(repository);
+
+    Component component = findComponent(tx, repository, ansibleGalaxyAttributes.getAuthor(),
+        ansibleGalaxyAttributes.getModule(), ansibleGalaxyAttributes.getVersion());
+
+    if (component == null) {
+      component = tx.createComponent(bucket, repository.getFormat()).group(ansibleGalaxyAttributes.getAuthor())
+          .name(ansibleGalaxyAttributes.getModule()).version(ansibleGalaxyAttributes.getVersion());
+      tx.saveComponent(component);
+    }
+
+    Asset asset = findAsset(tx, bucket, assetPath);
+    if (asset == null) {
+      asset = tx.createAsset(bucket, component);
+      asset.name(assetPath);
+      asset.formatAttributes().set(P_ASSET_KIND, assetKind.name());
+    }
+    return saveAsset(tx, asset, tempBlob, payload);
+  }
+
+  @Nullable
+  private Component findComponent(
+      final StorageTx tx,
+      final Repository repository,
+      final String group,
+      final String name,
+      final String version)
+  {
+    Iterable<Component> components = tx.findComponents(
+        Query.builder().where(P_GROUP).eq(group).and(P_NAME).eq(name).and(P_VERSION).eq(version).build(),
+        singletonList(repository));
+    if (components.iterator().hasNext()) {
+      return components.iterator().next();
+    }
+    return null;
   }
 }

@@ -15,6 +15,7 @@ package org.sonatype.nexus.plugins.ansiblegalaxy.internal.util;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
@@ -69,6 +70,18 @@ public class AnsibleGalaxyPathUtils
     String module = module(matcherState);
     String version = version(matcherState);
 
-    return String.format("%s/%s/%s", author, module, version);
+    return String.format("%s/%s/%s/version", author, module, version);
+  }
+
+  public String artifactPath(final State matcherState) {
+    String author = author(matcherState);
+    String module = module(matcherState);
+    String version = version(matcherState);
+
+    return String.format("%s/%s/%s/artifact", author, module, version);
+  }
+
+  public AnsibleGalaxyAttributes getAttributesFromMatcherState(final TokenMatcher.State state) {
+    return new AnsibleGalaxyAttributes(author(state), module(state), version(state));
   }
 }

@@ -16,6 +16,7 @@ import javax.annotation.Nonnull;
 
 import org.sonatype.nexus.repository.cache.CacheControllerHolder.CacheType;
 
+import static org.sonatype.nexus.repository.cache.CacheControllerHolder.CONTENT;
 import static org.sonatype.nexus.repository.cache.CacheControllerHolder.METADATA;
 
 /**
@@ -25,7 +26,8 @@ public enum AssetKind
 {
   API_INTERNALS(METADATA),
   VERSION_LIST(METADATA),
-  VERSION(METADATA);
+  VERSION(METADATA),
+  ARTIFACT(CONTENT);
 
   private final CacheType cacheType;
 

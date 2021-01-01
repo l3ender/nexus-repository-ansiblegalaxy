@@ -161,4 +161,18 @@ extends RecipeSupport {
         }
         )
   }
+
+  static Matcher artifactMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(GET, HEAD),
+        new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, AssetKind.ARTIFACT)
+            return true
+          }
+        }
+        )
+  }
 }

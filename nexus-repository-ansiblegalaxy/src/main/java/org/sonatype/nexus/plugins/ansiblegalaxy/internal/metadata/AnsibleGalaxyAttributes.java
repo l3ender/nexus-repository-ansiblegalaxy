@@ -17,33 +17,27 @@ package org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata;
  */
 public final class AnsibleGalaxyAttributes
 {
-  private String author;
+  private final String author;
 
-  private String module;
+  private final String module;
 
-  private String version;
+  private final String version;
+
+  public AnsibleGalaxyAttributes(String author, String module, String version) {
+    this.author = author;
+    this.module = module;
+    this.version = version;
+  }
 
   public String getAuthor() {
     return author;
-  }
-
-  public void setAuthor(final String author) {
-    this.author = author;
   }
 
   public String getModule() {
     return module;
   }
 
-  public void setModule(final String module) {
-    this.module = module;
-  }
-
   public String getVersion() {
     return version;
-  }
-
-  public void setVersion(final String version) {
-    this.version = version;
   }
 }
