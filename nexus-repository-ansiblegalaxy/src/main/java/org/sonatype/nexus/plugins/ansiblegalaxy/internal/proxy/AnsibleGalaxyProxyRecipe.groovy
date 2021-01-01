@@ -18,13 +18,11 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
-import org.sonatype.nexus.plugins.ansiblegalaxy.internal.AnsibleGalaxyFormat
+import org.sonatype.nexus.plugins.ansiblegalaxy.AnsibleGalaxyFormat
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.AnsibleGalaxyRecipeSupport
 import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.Repository
 import org.sonatype.nexus.repository.Type
-import org.sonatype.nexus.repository.cache.NegativeCacheFacet
-import org.sonatype.nexus.repository.cache.NegativeCacheHandler
 import org.sonatype.nexus.repository.http.HttpHandlers
 import org.sonatype.nexus.repository.proxy.ProxyHandler
 import org.sonatype.nexus.repository.types.ProxyType
@@ -32,16 +30,15 @@ import org.sonatype.nexus.repository.view.ConfigurableViewFacet
 import org.sonatype.nexus.repository.view.Route
 import org.sonatype.nexus.repository.view.Router
 import org.sonatype.nexus.repository.view.ViewFacet
-import org.sonatype.nexus.repository.view.handlers.LastDownloadedHandler
 
 /**
+ * AnsibleGalaxy proxy repository recipe.
  * @since 0.0.1
  */
 @Named(AnsibleGalaxyProxyRecipe.NAME)
 @Singleton
 class AnsibleGalaxyProxyRecipe
-    extends AnsibleGalaxyRecipeSupport
-{
+extends AnsibleGalaxyRecipeSupport {
   public static final String NAME = 'ansiblegalaxy-proxy'
 
   @Inject
@@ -51,18 +48,8 @@ class AnsibleGalaxyProxyRecipe
   ProxyHandler proxyHandler
 
   @Inject
-  Provider<NegativeCacheFacet> negativeCacheFacet
-
-  @Inject
-  NegativeCacheHandler negativeCacheHandler
-
-  @Inject
-  LastDownloadedHandler lastDownloadedHandler
-
-  @Inject
   AnsibleGalaxyProxyRecipe(@Named(ProxyType.NAME) final Type type,
-                   @Named(AnsibleGalaxyFormat.NAME) final Format format)
-  {
+  @Named(AnsibleGalaxyFormat.NAME) final Format format) {
     super(type, format)
   }
 
@@ -86,13 +73,15 @@ class AnsibleGalaxyProxyRecipe
   private ViewFacet configure(final ConfigurableViewFacet facet) {
     Router.Builder builder = new Router.Builder()
 
-    addBrowseUnsupportedRoute(builder)
-
-    // @todo Add matcher methods to this list
-    [packageAnsibleGalaxyMatcher(), assetAnsibleGalaxyMatcher()].each { matcher ->
+    [
+      apiInternalsMatcher(),
+      versionListMatcher(),
+      versionMatcher()
+    ].each { matcher ->
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)
           .handler(securityHandler)
+          .handler(routingRuleHandler)
           .handler(exceptionHandler)
           .handler(handlerContributor)
           .handler(negativeCacheHandler)

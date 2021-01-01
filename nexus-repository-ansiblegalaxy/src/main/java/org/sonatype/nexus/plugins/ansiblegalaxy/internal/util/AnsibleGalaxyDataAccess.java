@@ -23,6 +23,7 @@ import javax.inject.Named;
 import org.sonatype.nexus.blobstore.api.Blob;
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.common.hash.HashAlgorithm;
+import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
 import org.sonatype.nexus.repository.Repository;
 import org.sonatype.nexus.repository.storage.Asset;
 import org.sonatype.nexus.repository.storage.AssetBlob;
@@ -31,15 +32,17 @@ import org.sonatype.nexus.repository.storage.Component;
 import org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter;
 import org.sonatype.nexus.repository.storage.Query;
 import org.sonatype.nexus.repository.storage.StorageTx;
+import org.sonatype.nexus.repository.transaction.TransactionalStoreBlob;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.payloads.BlobPayload;
+import org.sonatype.nexus.repository.view.payloads.TempBlob;
+import org.sonatype.nexus.transaction.UnitOfWork;
 
 import com.google.common.collect.ImmutableList;
 
 import static java.util.Collections.singletonList;
-import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_GROUP;
-import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
+import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
 
 /**
@@ -56,16 +59,9 @@ public class AnsibleGalaxyDataAccess
    * @return found component or null if not found
    */
   @Nullable
-  public Component findComponent(final StorageTx tx,
-                                 final Repository repository,
-                                 final String assetPath)
-  {
-    Iterable<Component> components = tx.findComponents(
-        Query.builder()
-            .where(P_NAME).eq(assetPath)
-            .build(),
-        singletonList(repository)
-    );
+  public Component findComponent(final StorageTx tx, final Repository repository, final String assetPath) {
+    Iterable<Component> components =
+        tx.findComponents(Query.builder().where(P_NAME).eq(assetPath).build(), singletonList(repository));
     if (components.iterator().hasNext()) {
       return components.iterator().next();
     }
@@ -87,10 +83,36 @@ public class AnsibleGalaxyDataAccess
    *
    * @return blob content
    */
-  public Content saveAsset(final StorageTx tx,
-                           final Asset asset,
-                           final Supplier<InputStream> contentSupplier,
-                           final Payload payload) throws IOException
+  @TransactionalStoreBlob
+  public Content maybeCreateAndSaveAsset(
+      final Repository repository,
+      final String assetPath,
+      final AssetKind assetKind,
+      final TempBlob tempBlob,
+      final Payload payload) throws IOException
+  {
+    StorageTx tx = UnitOfWork.currentTx();
+    Bucket bucket = tx.findBucket(repository);
+
+    Asset asset = findAsset(tx, bucket, assetPath);
+    if (asset == null) {
+      asset = tx.createAsset(bucket, repository.getFormat());
+      asset.name(assetPath);
+      asset.formatAttributes().set(P_ASSET_KIND, assetKind.name());
+    }
+    return saveAsset(tx, asset, tempBlob, payload);
+  }
+
+  /**
+   * Save an asset and create blob.
+   *
+   * @return blob content
+   */
+  public Content saveAsset(
+      final StorageTx tx,
+      final Asset asset,
+      final Supplier<InputStream> contentSupplier,
+      final Payload payload) throws IOException
   {
     AttributesMap contentAttributes = null;
     String contentType = null;
@@ -106,16 +128,15 @@ public class AnsibleGalaxyDataAccess
    *
    * @return blob content
    */
-  public Content saveAsset(final StorageTx tx,
-                           final Asset asset,
-                           final Supplier<InputStream> contentSupplier,
-                           final String contentType,
-                           @Nullable final AttributesMap contentAttributes) throws IOException
+  public Content saveAsset(
+      final StorageTx tx,
+      final Asset asset,
+      final Supplier<InputStream> contentSupplier,
+      final String contentType,
+      @Nullable final AttributesMap contentAttributes) throws IOException
   {
     Content.applyToAsset(asset, Content.maintainLastModified(asset, contentAttributes));
-    AssetBlob assetBlob = tx.setBlob(
-        asset, asset.name(), contentSupplier, HASH_ALGORITHMS, null, contentType, false
-    );
+    AssetBlob assetBlob = tx.setBlob(asset, asset.name(), contentSupplier, HASH_ALGORITHMS, null, contentType, false);
     tx.saveAsset(asset);
     return toContent(asset, assetBlob.getBlob());
   }

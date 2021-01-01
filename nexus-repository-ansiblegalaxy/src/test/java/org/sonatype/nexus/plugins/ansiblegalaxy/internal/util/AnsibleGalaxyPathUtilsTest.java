@@ -35,26 +35,27 @@ public class AnsibleGalaxyPathUtilsTest
   @Mock
   TokenMatcher.State state;
 
-  private Map<String, String> tokens;
-
   @Before
   public void setUp() {
     underTest = new AnsibleGalaxyPathUtils();
-    tokens = setupTokens("myTokenValue");
+    Map<String, String> tokens = new HashMap<>();
+    tokens.put("author", "azure");
+    tokens.put("module", "azcollection");
+    tokens.put("version", "1.2.0");
     when(state.getTokens()).thenReturn(tokens);
   }
 
   @Test
-  public void buildAssetPath() {
-    String result = underTest.buildAssetPath(state, AnsibleGalaxyPathUtils.PACKAGE_FILENAME);
+  public void versionListPath() {
+    String result = underTest.versionListPath(state);
 
-    assertThat(result, is(equalTo("/myTokenValue/myPackageFilename.txt")));
+    assertThat(result, is(equalTo("azure/azcollection/versions")));
   }
 
-  private Map<String, String> setupTokens(final String tokenValue) {
-    Map<String, String> tokens = new HashMap<>();
-    tokens.put("myTokenName", tokenValue);
+  @Test
+  public void versionPath() {
+    String result = underTest.versionPath(state);
 
-    return tokens;
+    assertThat(result, is(equalTo("azure/azcollection/1.2.0")));
   }
 }

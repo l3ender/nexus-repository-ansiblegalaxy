@@ -10,26 +10,24 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.plugins.ansiblegalaxy.internal.security;
+package org.sonatype.nexus.plugins.ansiblegalaxy;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.sonatype.nexus.plugins.ansiblegalaxy.AnsibleGalaxyFormat;
 import org.sonatype.nexus.repository.Format;
-import org.sonatype.nexus.repository.security.RepositoryFormatSecurityContributor;
 
 /**
- * AnsibleGalaxy format security resource.
+ * AnsibleGalaxy repository format.
  */
-@Named
+@Named(AnsibleGalaxyFormat.NAME)
 @Singleton
-public class AnsibleGalaxyFormatSecurityContributor
-    extends RepositoryFormatSecurityContributor
+public class AnsibleGalaxyFormat
+    extends Format
 {
-  @Inject
-  public AnsibleGalaxyFormatSecurityContributor(@Named(AnsibleGalaxyFormat.NAME) final Format format) {
-    super(format);
+  public static final String NAME = "ansiblegalaxy";
+
+  public AnsibleGalaxyFormat() {
+    super(NAME);
   }
 }

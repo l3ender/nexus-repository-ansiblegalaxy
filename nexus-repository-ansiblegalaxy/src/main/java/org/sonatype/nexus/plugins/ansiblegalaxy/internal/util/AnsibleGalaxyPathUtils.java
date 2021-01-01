@@ -22,27 +22,34 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * @since 0.0.1
+ * Utility methods for working with AnsibleGalaxy routes and paths.
  */
 @Named
 @Singleton
 public class AnsibleGalaxyPathUtils
 {
-  // @todo Change this to a valid filename for your format
-  public static final String PACKAGE_FILENAME = "myPackageFilename.txt";
+  /**
+   * Returns the author from a {@link TokenMatcher.State}.
+   */
+  public String author(final TokenMatcher.State state) {
+    return match(state, "author");
+  }
 
-  // @todo Change this to a valid filename for your format
-  public static final String ASSET_FILENAME = "myAssetFilename.fil";
+  public String module(final TokenMatcher.State state) {
+    return match(state, "module");
+  }
+
+  public String version(final TokenMatcher.State state) {
+    return match(state, "version");
+  }
 
   public TokenMatcher.State matcherState(final Context context) {
     return context.getAttributes().require(TokenMatcher.State.class);
   }
 
-  // @todo Change this to a valid token for your format
-  public String myToken(final TokenMatcher.State state) {
-    return match(state, "myTokenName");
-  }
-
+  /**
+   * Utility method encapsulating getting a particular token by name from a matcher, including preconditions.
+   */
   private String match(final TokenMatcher.State state, final String name) {
     checkNotNull(state);
     String result = state.getTokens().get(name);
@@ -50,7 +57,18 @@ public class AnsibleGalaxyPathUtils
     return result;
   }
 
-  public String buildAssetPath(final State matcherState, final String assetName) {
-    return String.format("/%s/%s", myToken(matcherState), assetName);
+  public String versionListPath(final State matcherState) {
+    String author = author(matcherState);
+    String module = module(matcherState);
+
+    return String.format("%s/%s/versions", author, module);
+  }
+
+  public String versionPath(final State matcherState) {
+    String author = author(matcherState);
+    String module = module(matcherState);
+    String version = version(matcherState);
+
+    return String.format("%s/%s/%s", author, module, version);
   }
 }
