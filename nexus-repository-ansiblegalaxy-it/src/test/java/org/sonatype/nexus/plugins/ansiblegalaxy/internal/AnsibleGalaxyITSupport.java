@@ -48,10 +48,6 @@ public class AnsibleGalaxyITSupport
   }
 
   protected AnsibleGalaxyClient ansiblegalaxyClient(final URL repositoryUrl) throws Exception {
-    return new AnsibleGalaxyClient(
-        clientBuilder(repositoryUrl).build(),
-        clientContext(),
-        repositoryUrl.toURI()
-    );
+    return new AnsibleGalaxyClient(clientBuilder(repositoryUrl).build(), clientContext(), repositoryUrl.toURI());
   }
 }

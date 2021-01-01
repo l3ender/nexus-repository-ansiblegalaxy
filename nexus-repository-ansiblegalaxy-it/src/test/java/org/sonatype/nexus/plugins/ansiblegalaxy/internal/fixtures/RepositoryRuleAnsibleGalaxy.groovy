@@ -18,9 +18,8 @@ import org.sonatype.nexus.repository.manager.RepositoryManager
 import org.sonatype.nexus.testsuite.testsupport.fixtures.RepositoryRule
 
 class RepositoryRuleAnsibleGalaxy
-    extends RepositoryRule
-    implements AnsibleGalaxyRepoRecipes
-{
+extends RepositoryRule
+implements AnsibleGalaxyRepoRecipes {
   RepositoryRuleAnsibleGalaxy(final Provider<RepositoryManager> repositoryManagerProvider) {
     super(repositoryManagerProvider)
   }
