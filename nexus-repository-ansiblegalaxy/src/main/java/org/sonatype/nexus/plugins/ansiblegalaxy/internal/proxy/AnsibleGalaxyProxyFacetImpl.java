@@ -86,7 +86,8 @@ public class AnsibleGalaxyProxyFacetImpl
   @Override
   protected Content getCachedContent(final Context context) {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
-    if (assetKind.equals(AssetKind.API_INTERNALS)) {
+
+    if (assetKind == AssetKind.API_INTERNALS) {
       return null; // results not stored
     }
 
@@ -118,7 +119,7 @@ public class AnsibleGalaxyProxyFacetImpl
   protected Content store(final Context context, final Content content) throws IOException {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
 
-    if (assetKind.equals(AssetKind.API_INTERNALS)) {
+    if (assetKind == AssetKind.API_INTERNALS) {
       return content; // results not stored
     }
 
@@ -143,7 +144,7 @@ public class AnsibleGalaxyProxyFacetImpl
       final AssetKind assetKind) throws IOException
   {
     StorageFacet storageFacet = facet(StorageFacet.class);
-    try (InputStream updatedStream = replaceContent(content.openInputStream())) {
+    try (InputStream updatedStream = getUpdatedContent(assetKind, content.openInputStream())) {
       try (TempBlob tempBlob = storageFacet.createTempBlob(updatedStream, HASH_ALGORITHMS)) {
         return ansiblegalaxyDataAccess.maybeCreateAndSaveAsset(getRepository(), assetPath, assetKind, tempBlob,
             content);
@@ -158,7 +159,7 @@ public class AnsibleGalaxyProxyFacetImpl
       final AssetKind assetKind) throws IOException
   {
     StorageFacet storageFacet = facet(StorageFacet.class);
-    try (InputStream updatedStream = replaceContent(content.openInputStream())) {
+    try (InputStream updatedStream = getUpdatedContent(assetKind, content.openInputStream())) {
       try (TempBlob tempBlob = storageFacet.createTempBlob(updatedStream, HASH_ALGORITHMS)) {
         return ansiblegalaxyDataAccess.maybeCreateAndSaveComponent(getRepository(), ansibleGalaxyAttributes, assetPath,
             tempBlob, content, assetKind);
@@ -166,7 +167,10 @@ public class AnsibleGalaxyProxyFacetImpl
     }
   }
 
-  private InputStream replaceContent(InputStream in) throws IOException {
+  private InputStream getUpdatedContent(AssetKind assetKind, InputStream in) throws IOException {
+    if (assetKind == AssetKind.ARTIFACT) {
+      return in; // do not modify
+    }
     String content =
         Strings.nullToEmpty(CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8))).trim();
     String repoAbsoluteUrl = getRepository().getUrl() + "/";
