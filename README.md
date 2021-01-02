@@ -125,7 +125,7 @@ then install the plugin with the options shown below:
 Thanks to some upstream work in Nexus Repository, it's become a LOT easier to install a plugin. To install the `ansiblegalaxy` plugin, follow these steps:
 
 * Build the plugin with `mvn clean package -PbuildKar`
-* Copy the `nexus-repository-ansiblegalaxy-0.0.1-bundle.kar` file from your `target` folder to the `deploy` folder for your Nexus Repository installation.
+* Copy the `nexus-repository-ansiblegalaxy-*-bundle.kar` file from your `target` folder to the `deploy` folder for your Nexus Repository installation.
 
 Once you've done this, go ahead and either restart Nexus Repo, or go ahead and start it if it wasn't running to begin with.
 
