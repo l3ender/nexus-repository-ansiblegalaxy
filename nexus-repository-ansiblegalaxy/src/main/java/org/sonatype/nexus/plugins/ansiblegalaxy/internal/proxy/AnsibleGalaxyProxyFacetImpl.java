@@ -92,9 +92,9 @@ public class AnsibleGalaxyProxyFacetImpl
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case VERSION_LIST:
+      case COLLECTION_VERSION_LIST:
         return getAsset(ansiblegalaxyPathUtils.versionListPath(matcherState));
-      case VERSION:
+      case COLLECTION_VERSION:
         return getAsset(ansiblegalaxyPathUtils.versionPath(matcherState));
       case ARTIFACT:
         return getAsset(ansiblegalaxyPathUtils.artifactPath(matcherState));
@@ -124,15 +124,14 @@ public class AnsibleGalaxyProxyFacetImpl
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case VERSION_LIST:
+      case COLLECTION_VERSION_LIST:
         return putAsset(content, ansiblegalaxyPathUtils.versionListPath(matcherState), assetKind);
-      case VERSION:
-        return putAsset(content, ansiblegalaxyPathUtils.versionPath(matcherState), assetKind);
+      case COLLECTION_VERSION:
+        return putComponent(ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState), content,
+            ansiblegalaxyPathUtils.versionPath(matcherState), assetKind);
       case ARTIFACT:
-        AnsibleGalaxyAttributes ansiblegalaxyAttributes =
-            ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState);
-        return putComponent(ansiblegalaxyAttributes, content, ansiblegalaxyPathUtils.artifactPath(matcherState),
-            assetKind);
+        return putComponent(ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState), content,
+            ansiblegalaxyPathUtils.artifactPath(matcherState), assetKind);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -152,6 +151,21 @@ public class AnsibleGalaxyProxyFacetImpl
     }
   }
 
+  private Content putComponent(
+      final AnsibleGalaxyAttributes ansibleGalaxyAttributes,
+      final Content content,
+      final String assetPath,
+      final AssetKind assetKind) throws IOException
+  {
+    StorageFacet storageFacet = facet(StorageFacet.class);
+    try (InputStream updatedStream = replaceContent(content.openInputStream())) {
+      try (TempBlob tempBlob = storageFacet.createTempBlob(updatedStream, HASH_ALGORITHMS)) {
+        return ansiblegalaxyDataAccess.maybeCreateAndSaveComponent(getRepository(), ansibleGalaxyAttributes, assetPath,
+            tempBlob, content, assetKind);
+      }
+    }
+  }
+
   private InputStream replaceContent(InputStream in) throws IOException {
     String content =
         Strings.nullToEmpty(CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8))).trim();
@@ -160,19 +174,6 @@ public class AnsibleGalaxyProxyFacetImpl
     String replacedContent = content.replaceAll(remoteUrl, repoAbsoluteUrl);
     log.trace("content replace:\n\t---> old: {}\n\t---> new: {}", content, replacedContent);
     return new ReaderInputStream(CharSource.wrap(replacedContent).openStream(), StandardCharsets.UTF_8);
-  }
-
-  private Content putComponent(
-      final AnsibleGalaxyAttributes ansibleGalaxyAttributes,
-      final Content content,
-      final String assetPath,
-      final AssetKind assetKind) throws IOException
-  {
-    StorageFacet storageFacet = facet(StorageFacet.class);
-    try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-      return ansiblegalaxyDataAccess.maybeCreateAndSaveComponent(getRepository(), ansibleGalaxyAttributes, assetPath,
-          tempBlob, content, assetKind);
-    }
   }
 
   @Override

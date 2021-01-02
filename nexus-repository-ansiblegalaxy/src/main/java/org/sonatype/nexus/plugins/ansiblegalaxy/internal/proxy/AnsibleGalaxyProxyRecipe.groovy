@@ -75,8 +75,8 @@ extends AnsibleGalaxyRecipeSupport {
 
     [
       apiInternalsMatcher(),
-      versionListMatcher(),
-      versionMatcher(),
+      collectionVersionListMatcher(),
+      collectionVersionMatcher(),
       artifactMatcher()
     ].each { matcher ->
       builder.route(new Route.Builder().matcher(matcher)

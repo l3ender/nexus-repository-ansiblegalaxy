@@ -135,7 +135,7 @@ extends RecipeSupport {
         )
   }
 
-  static Matcher versionListMatcher() {
+  static Matcher collectionVersionListMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         LogicMatchers.or(
@@ -145,21 +145,21 @@ extends RecipeSupport {
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.VERSION_LIST)
+            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_VERSION_LIST)
             return true
           }
         }
         )
   }
 
-  static Matcher versionMatcher() {
+  static Matcher collectionVersionMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/{version}/"),
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.VERSION)
+            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_VERSION)
             return true
           }
         }
