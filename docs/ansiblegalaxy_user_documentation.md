@@ -19,10 +19,13 @@
 
 Full documentation on installing `ansible-galaxy` can be found on [the Ansible Galaxy project website](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html).
 
-
 You can create a proxy repository in Nexus Repository Manager (NXRM) that will cache packages from a remote Ansible Galaxy repository, like
 [https://galaxy.ansible.com/](https://galaxy.ansible.com/). Then, you can make the `ansible-galaxy` client use your Nexus Repository Proxy 
 instead of the remote repository.
+
+### Installation
+
+See [installing the plugin](../readme.md#installing-the-plugin).
 
 ### Repository configuration
  

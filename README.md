@@ -49,7 +49,7 @@ You may also find it helpful to configure your IDE to use the [Sonatype Code sty
 
 ### Download
 
- Find pre-compiled files [here](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases).
+ Pre-compiled plugin files can be found on the [releases page](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases).
 
 ### Building
 
@@ -94,7 +94,7 @@ table will be updated to indicate which version of Nexus Repository it will func
 available basis, as this is community supported. If you see a new version of Nexus Repository, go ahead and update the
 plugin and send us a PR after testing it out!
 
-All released versions can be found [here](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases).
+All released versions can be found on [the releases page](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases).
 
 ## Features Implemented In This Plugin 
 
