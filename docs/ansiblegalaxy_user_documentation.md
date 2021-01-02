@@ -14,29 +14,27 @@
 -->
 
 
-[AnsibleGalaxy](https://add_URL_To_Format_Info_Here/) provides Add_Format_Description_Here.
+[Ansible Galaxy](https://galaxy.ansible.com/) provides a way to install community collections and roles for Ansible.
+
+Full documentation on installing `ansible-galaxy` can be found on [the Ansible Galaxy project website](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html).
 
 
-Full documentation on installing `ansiblegalaxy` can be found on [the AnsibleGalaxy project website](https://add_Format_Install_Info_URL/).
-
-
-You can create a proxy repository in Nexus Repository Manager (NXRM) that will cache packages from a remote AnsibleGalaxy repository, like
-[Add_Format_Repo_Name](https://add_format_repo_url/). Then, you can make the `ansiblegalaxy` client use your Nexus Repository Proxy 
+You can create a proxy repository in Nexus Repository Manager (NXRM) that will cache packages from a remote Ansible Galaxy repository, like
+[https://galaxy.ansible.com/](https://galaxy.ansible.com/). Then, you can make the `ansible-galaxy` client use your Nexus Repository Proxy 
 instead of the remote repository.
  
-To proxy a AnsibleGalaxy repository, you simply create a new 'ansiblegalaxy (proxy)' as documented in 
+To proxy an Ansible Galaxy repository, you simply create a new 'ansiblegalaxy (proxy)' as documented in 
 [Repository Management](https://help.sonatype.com/repomanager3/configuration/repository-management) in
 detail. Minimal configuration steps are:
 
 - Define 'Name' - e.g. `ansiblegalaxy-proxy`
-- Define URL for 'Remote storage' - e.g. [https://add_format_repo_url/](https://add_format_repo_url/)
+- Define URL for 'Remote storage' - e.g. [https://galaxy.ansible.com/](https://galaxy.ansible.com/)
 - Select a `Blob store` for `Storage`
 
-Using the `ansiblegalaxy` client, you can now download packages from your NXRM AnsibleGalaxy proxy like so:
+Using the `ansible-galaxy` client, you can now download packages from your NXRM AnsibleGalaxy proxy like so:
 
-    $ add client command line example here
+```bash
+ansible-galaxy collection install azure.azcollection -s http://localhost:8081/repository/ansible/
+```
     
-The command above tells ansiblegalaxy to fetch (and install) packages from your NXRM AnsibleGalaxy proxy. The NXRM AnsibleGalaxy proxy will 
-download any missing packages from the remote AnsibleGalaxy repository, and cache the packages on the NXRM AnsibleGalaxy proxy.
-The next time any client requests the same package from your NXRM AnsibleGalaxy proxy, the already cached package will
-be returned to the client.
+The command above tells ansible-galaxy to fetch (and install) packages from your NXRM Ansible Galaxy proxy. The NXRM Ansible Galaxy proxy will download any missing packages from the remote Ansible Galaxy repository, and cache the packages on the NXRM Ansible Galaxy proxy. The next time any client requests the same package from your NXRM Ansible Galaxy proxy, the already cached package will be returned to the client.

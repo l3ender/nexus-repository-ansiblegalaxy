@@ -13,9 +13,8 @@
 
 -->
 <!-- generated with nexus-format-archetype version 1.0.48 on Dec 27, 2020 -->
-# Nexus Repository AnsibleGalaxy Format
+# Nexus Repository Ansible Galaxy Format
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.sonatype.nexus.plugins/nexus-repository-ansiblegalaxy.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.sonatype.nexus.plugins%22%20AND%20a:%22nexus-repository-ansiblegalaxy%22) [![CircleCI](https://circleci.com/gh/sonatype-nexus-community/nexus-repository-ansiblegalaxy.svg?style=shield)](https://circleci.com/gh/sonatype-nexus-community/nexus-repository-ansiblegalaxy) [![Join the chat at https://gitter.im/sonatype/nexus-developers](https://badges.gitter.im/sonatype/nexus-developers.svg)](https://gitter.im/sonatype/nexus-developers?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![DepShield Badge](https://depshield.sonatype.org/badges/sonatype-nexus-community/nexus-repository-ansiblegalaxy/depshield.svg)](https://depshield.github.io)
 
 # Table Of Contents
 
@@ -23,10 +22,10 @@
    * [Requirements](#requirements)
    * [Download](#download)
    * [Building](#building)
-* [Using AnsibleGalaxy with Nexus Repository Manager 3](#using-ansiblegalaxy-with-nexus-repository-manager-3)
+* [Using Ansible Galaxy with Nexus Repository Manager 3](#using-ansiblegalaxy-with-nexus-repository-manager-3)
 * [Compatibility with Nexus Repository Manager 3 Versions](#compatibility-with-nexus-repository-manager-3-versions)
 * [Features Implemented In This Plugin](#features-implemented-in-this-plugin)
-   * [Supported AnsibleGalaxy Commands](#supported-ansiblegalaxy-commands)
+   * [Supported Ansible Galaxy Commands](#supported-ansible-galaxy-commands)
 * [Installing the plugin](#installing-the-plugin)
    * [Easiest Install](#easiest-install)
    * [Temporary Install](#temporary-install)
@@ -50,7 +49,7 @@ You may also find it helpful to configure your IDE to use the [Sonatype Code sty
 
 ### Download
 
- Find pre-compiled files [here](https://search.maven.org/search?q=g:%22org.sonatype.nexus.plugins%22%20AND%20a:%22nexus-repository-ansiblegalaxy%22).
+ Find pre-compiled files [here](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases).
 
 ### Building
 
@@ -95,7 +94,7 @@ table will be updated to indicate which version of Nexus Repository it will func
 available basis, as this is community supported. If you see a new version of Nexus Repository, go ahead and update the
 plugin and send us a PR after testing it out!
 
-All released versions can be found [here](https://github.com/sonatype-nexus-community/nexus-repository-ansiblegalaxy/releases).
+All released versions can be found [here](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases).
 
 ## Features Implemented In This Plugin 
 
@@ -105,13 +104,17 @@ All released versions can be found [here](https://github.com/sonatype-nexus-comm
 | Hosted  |                      |
 | Group   |                      |
 
-### Supported AnsibleGalaxy Commands
+### Supported `ansible-galaxy` Commands
 
 #### Proxy
 
 | Plugin Version               | Nexus Repository Version |
 |------------------------------|--------------------------|
-| `ansiblegalaxy client command`         | :heavy_check_mark:       |
+| `ansible-galaxy collection install`         | :heavy_check_mark:       |
+
+You must set the Galaxy API endpoint/server when using the client, either by:
+* provide the `-s API_SERVER` or `--server API_SERVER` argument for each installation command.
+* configure `GALAXY_SERVER` configuration value or `ANSIBLE_GALAXY_SERVER` environment varaible (see [doc](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#galaxy-server)).
 
 ## Installing the plugin
 
