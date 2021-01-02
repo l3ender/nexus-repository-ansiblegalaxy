@@ -112,9 +112,8 @@ All released versions can be found [here](https://github.com/l3ender/nexus-repos
 |------------------------------|--------------------------|
 | `ansible-galaxy collection install`         | :heavy_check_mark:       |
 
-You must set the Galaxy API endpoint/server when using the client, either by:
-* provide the `-s API_SERVER` or `--server API_SERVER` argument for each installation command.
-* configure `GALAXY_SERVER` configuration value or `ANSIBLE_GALAXY_SERVER` environment varaible (see [doc](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#galaxy-server)).
+Be sure to [configure the `ansible-galaxy` client](docs/ansiblegalaxy_user_documentation.md#configuring-the-ansible-galaxy-client).
+
 
 ## Installing the plugin
 
