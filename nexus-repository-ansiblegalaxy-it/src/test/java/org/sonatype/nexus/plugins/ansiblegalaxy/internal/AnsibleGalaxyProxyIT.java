@@ -28,14 +28,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.content;
 import static org.sonatype.goodies.httpfixture.server.fluent.Behaviours.error;
-import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.PACKAGE_FILENAME;
 import static org.sonatype.nexus.testsuite.testsupport.FormatClientSupport.status;
 
 public class AnsibleGalaxyProxyIT
     extends AnsibleGalaxyITSupport
 {
-  // @todo Change test path for your format
-  private static final String TEST_PATH = "some/valid/path/for/your/remote/" + PACKAGE_FILENAME;
+  private static final String TEST_PATH = "api/v2/collections/azure/azcollection/versions/";
 
   private AnsibleGalaxyClient proxyClient;
 
@@ -43,17 +41,13 @@ public class AnsibleGalaxyProxyIT
 
   @Configuration
   public static Option[] configureNexus() {
-    return NexusPaxExamSupport.options(
-        NexusITSupport.configureNexusBase(),
-        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-ansiblegalaxy")
-    );
+    return NexusPaxExamSupport.options(NexusITSupport.configureNexusBase(),
+        nexusFeature("org.sonatype.nexus.plugins", "nexus-repository-ansiblegalaxy"));
   }
 
   @Test
   public void unresponsiveRemoteProduces404() throws Exception {
-    Server server = Server.withPort(0).serve("/*")
-        .withBehaviours(error(HttpStatus.NOT_FOUND))
-        .start();
+    Server server = Server.withPort(0).serve("/*").withBehaviours(error(HttpStatus.NOT_FOUND)).start();
     try {
       proxyRepo = repos.createAnsibleGalaxyProxy("ansiblegalaxy-test-proxy-notfound", server.getUrl().toExternalForm());
       proxyClient = ansiblegalaxyClient(proxyRepo);
@@ -66,9 +60,7 @@ public class AnsibleGalaxyProxyIT
 
   @Test
   public void retrieveAnsibleGalaxyWhenRemoteOffline() throws Exception {
-    Server server = Server.withPort(0).serve("/*")
-        .withBehaviours(content("Response"))
-        .start();
+    Server server = Server.withPort(0).serve("/*").withBehaviours(content("Response")).start();
     try {
       proxyRepo = repos.createAnsibleGalaxyProxy("ansiblegalaxy-test-proxy-offline", server.getUrl().toExternalForm());
       proxyClient = ansiblegalaxyClient(proxyRepo);

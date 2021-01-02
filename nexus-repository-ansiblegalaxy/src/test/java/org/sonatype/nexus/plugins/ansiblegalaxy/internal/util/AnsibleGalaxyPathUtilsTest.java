@@ -35,26 +35,49 @@ public class AnsibleGalaxyPathUtilsTest
   @Mock
   TokenMatcher.State state;
 
-  private Map<String, String> tokens;
-
   @Before
   public void setUp() {
     underTest = new AnsibleGalaxyPathUtils();
-    tokens = setupTokens("myTokenValue");
-    when(state.getTokens()).thenReturn(tokens);
+    when(state.getTokens()).thenReturn(defaultTokens());
+  }
+
+  private Map<String, String> defaultTokens() {
+    Map<String, String> tokens = new HashMap<>();
+    tokens.put("author", "azure");
+    tokens.put("module", "azcollection");
+    tokens.put("version", "1.2.0");
+    return tokens;
   }
 
   @Test
-  public void buildAssetPath() {
-    String result = underTest.buildAssetPath(state, AnsibleGalaxyPathUtils.PACKAGE_FILENAME);
+  public void versionListPath() {
+    String result = underTest.versionListPath(state);
 
-    assertThat(result, is(equalTo("/myTokenValue/myPackageFilename.txt")));
+    assertThat(result, is(equalTo("azure/azcollection/versions1")));
   }
 
-  private Map<String, String> setupTokens(final String tokenValue) {
-    Map<String, String> tokens = new HashMap<>();
-    tokens.put("myTokenName", tokenValue);
+  @Test
+  public void versionListPathPaged() {
+    Map<String, String> tokens = defaultTokens();
+    tokens.put("pagenum", "3");
+    when(state.getTokens()).thenReturn(tokens);
+    String result = underTest.versionListPath(state);
 
-    return tokens;
+    assertThat(result, is(equalTo("azure/azcollection/versions3")));
   }
+
+  @Test
+  public void versionPath() {
+    String result = underTest.versionPath(state);
+
+    assertThat(result, is(equalTo("azure/azcollection/1.2.0/version")));
+  }
+
+  @Test
+  public void artifactPath() {
+    String result = underTest.artifactPath(state);
+
+    assertThat(result, is(equalTo("azure/azcollection/1.2.0/artifact")));
+  }
+
 }

@@ -12,6 +12,8 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal;
 
+import org.sonatype.nexus.plugins.ansiblegalaxy.AnsibleGalaxyFormat;
+
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;

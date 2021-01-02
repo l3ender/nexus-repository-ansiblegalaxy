@@ -10,32 +10,24 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.plugins.ansiblegalaxy.internal;
+package org.sonatype.nexus.plugins.ansiblegalaxy;
 
-import javax.annotation.Nonnull;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
-import org.sonatype.nexus.repository.cache.CacheControllerHolder.CacheType;
-
-import static org.sonatype.nexus.repository.cache.CacheControllerHolder.CONTENT;
-import static org.sonatype.nexus.repository.cache.CacheControllerHolder.METADATA;
+import org.sonatype.nexus.repository.Format;
 
 /**
- * Asset kinds for AnsibleGalaxy.
+ * AnsibleGalaxy repository format.
  */
-public enum AssetKind
+@Named(AnsibleGalaxyFormat.NAME)
+@Singleton
+public class AnsibleGalaxyFormat
+    extends Format
 {
-  // @todo Change these enums as needed for this format
-  PACKAGES(METADATA),
-  ARCHIVE(CONTENT);
+  public static final String NAME = "ansiblegalaxy";
 
-  private final CacheType cacheType;
-
-  AssetKind(final CacheType cacheType) {
-    this.cacheType = cacheType;
-  }
-
-  @Nonnull
-  public CacheType getCacheType() {
-    return cacheType;
+  public AnsibleGalaxyFormat() {
+    super(NAME);
   }
 }

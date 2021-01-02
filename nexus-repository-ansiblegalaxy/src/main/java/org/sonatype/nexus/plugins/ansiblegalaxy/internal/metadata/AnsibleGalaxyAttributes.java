@@ -1,6 +1,6 @@
 /*
  * Sonatype Nexus (TM) Open Source Version
- * Copyright (c) 2020-present Sonatype, Inc.
+ * Copyright (c) 2008-present Sonatype, Inc.
  * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
@@ -10,26 +10,34 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.plugins.ansiblegalaxy.internal.security;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
-import org.sonatype.nexus.plugins.ansiblegalaxy.AnsibleGalaxyFormat;
-import org.sonatype.nexus.repository.Format;
-import org.sonatype.nexus.repository.security.RepositoryFormatSecurityContributor;
+package org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata;
 
 /**
- * AnsibleGalaxy format security resource.
+ * Object for storing AnsibleGalaxy specific attributes.
  */
-@Named
-@Singleton
-public class AnsibleGalaxyFormatSecurityContributor
-    extends RepositoryFormatSecurityContributor
+public final class AnsibleGalaxyAttributes
 {
-  @Inject
-  public AnsibleGalaxyFormatSecurityContributor(@Named(AnsibleGalaxyFormat.NAME) final Format format) {
-    super(format);
+  private final String author;
+
+  private final String module;
+
+  private final String version;
+
+  public AnsibleGalaxyAttributes(String author, String module, String version) {
+    this.author = author;
+    this.module = module;
+    this.version = version;
+  }
+
+  public String getAuthor() {
+    return author;
+  }
+
+  public String getModule() {
+    return module;
+  }
+
+  public String getVersion() {
+    return version;
   }
 }

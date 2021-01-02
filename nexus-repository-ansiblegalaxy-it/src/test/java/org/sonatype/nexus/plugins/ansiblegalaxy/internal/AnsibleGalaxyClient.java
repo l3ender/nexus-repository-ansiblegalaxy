@@ -22,9 +22,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 public class AnsibleGalaxyClient
     extends FormatClientSupport
 {
-  public AnsibleGalaxyClient(final CloseableHttpClient httpClient,
-                     final HttpClientContext httpClientContext,
-                     final URI repositoryBaseUri)
+  public AnsibleGalaxyClient(
+      final CloseableHttpClient httpClient,
+      final HttpClientContext httpClientContext,
+      final URI repositoryBaseUri)
   {
     super(httpClient, httpClientContext, repositoryBaseUri);
   }

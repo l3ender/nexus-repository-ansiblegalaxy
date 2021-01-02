@@ -26,17 +26,14 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 trait AnsibleGalaxyRepoRecipes
-    extends ConfigurationRecipes
-{
+extends ConfigurationRecipes {
   @Nonnull
-  Repository createAnsibleGalaxyProxy(final String name, final String remoteUrl)
-  {
+  Repository createAnsibleGalaxyProxy(final String name, final String remoteUrl) {
     createRepository(createProxy(name, 'ansiblegalaxy-proxy', remoteUrl))
   }
 
   @Nonnull
-  Repository createRHosted(final String name)
-  {
+  Repository createAnsibleGalaxyHosted(final String name) {
     createRepository(createHosted(name, 'ansiblegalaxy-hosted'))
   }
 
