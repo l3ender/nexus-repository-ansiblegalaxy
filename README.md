@@ -77,7 +77,7 @@ To read the generated admin password for your first login to the web UI, you can
 
 For simplicity, you should check `Enable anonymous access` in the prompts following your first login.   
 
-## Using AnsibleGalaxy With Nexus Repository Manager 3
+## Using Ansible Galaxy With Nexus Repository Manager 3
 
 [We have detailed instructions on how to get started here!](docs/ansiblegalaxy_user_documentation.md)
 
@@ -199,7 +199,7 @@ by the Sonatype Support team to remove the community item in order to determine 
 Remember:
 
 * Use this contribution at the risk tolerance that you have
-* Do NOT file Sonatype support tickets related to AnsibleGalaxy support in regard to this plugin
+* Do NOT file Sonatype support tickets related to Ansible Galaxy support in regard to this plugin
 * DO file issues here on GitHub, so that the community can pitch in
 
 Phew, that was easier than I thought. Last but not least of all:

@@ -25,7 +25,7 @@ instead of the remote repository.
 
 ### Installation
 
-See [installing the plugin](../readme.md#installing-the-plugin).
+See [installing the plugin](../README.md#installing-the-plugin).
 
 ### Repository configuration
  
