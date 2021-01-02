@@ -20,6 +20,7 @@ import javax.inject.Provider
 
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.security.AnsibleGalaxySecurityFacet
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.QueryTokenMatcher
 import org.sonatype.nexus.repository.Format
 import org.sonatype.nexus.repository.RecipeSupport
 import org.sonatype.nexus.repository.Type
@@ -137,7 +138,10 @@ extends RecipeSupport {
   static Matcher versionListMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/"),
+        LogicMatchers.or(
+        new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/?page={pagenum}"),
+        new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/")
+        ),
         new Matcher() {
           @Override
           boolean matches(final Context context) {

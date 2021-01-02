@@ -200,6 +200,8 @@ public class AnsibleGalaxyProxyFacetImpl
 
   @Override
   protected String getUrl(@Nonnull final Context context) {
-    return context.getRequest().getPath().substring(1);
+    String url = AnsibleGalaxyPathUtils.getUri(context.getRequest()).substring(1);
+    log.debug("url: {}", url);
+    return url;
   }
 }

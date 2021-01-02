@@ -38,18 +38,32 @@ public class AnsibleGalaxyPathUtilsTest
   @Before
   public void setUp() {
     underTest = new AnsibleGalaxyPathUtils();
+    when(state.getTokens()).thenReturn(defaultTokens());
+  }
+
+  private Map<String, String> defaultTokens() {
     Map<String, String> tokens = new HashMap<>();
     tokens.put("author", "azure");
     tokens.put("module", "azcollection");
     tokens.put("version", "1.2.0");
-    when(state.getTokens()).thenReturn(tokens);
+    return tokens;
   }
 
   @Test
   public void versionListPath() {
     String result = underTest.versionListPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/versions")));
+    assertThat(result, is(equalTo("azure/azcollection/versions1")));
+  }
+
+  @Test
+  public void versionListPathPaged() {
+    Map<String, String> tokens = defaultTokens();
+    tokens.put("pagenum", "3");
+    when(state.getTokens()).thenReturn(tokens);
+    String result = underTest.versionListPath(state);
+
+    assertThat(result, is(equalTo("azure/azcollection/versions3")));
   }
 
   @Test
@@ -65,4 +79,5 @@ public class AnsibleGalaxyPathUtilsTest
 
     assertThat(result, is(equalTo("azure/azcollection/1.2.0/artifact")));
   }
+
 }

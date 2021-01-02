@@ -12,13 +12,21 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.util;
 
+import java.util.Map.Entry;
+
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
 import org.sonatype.nexus.repository.view.Context;
+import org.sonatype.nexus.repository.view.Parameters;
+import org.sonatype.nexus.repository.view.Request;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -29,6 +37,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 public class AnsibleGalaxyPathUtils
 {
+
+  private static final Logger LOG = Loggers.getLogger(AnsibleGalaxyPathUtils.class);
+
   /**
    * Returns the author from a {@link TokenMatcher.State}.
    */
@@ -45,7 +56,9 @@ public class AnsibleGalaxyPathUtils
   }
 
   public TokenMatcher.State matcherState(final Context context) {
-    return context.getAttributes().require(TokenMatcher.State.class);
+    State state = context.getAttributes().require(TokenMatcher.State.class);
+    LOG.info("matched state tokens: {}", state.getTokens());
+    return state;
   }
 
   /**
@@ -61,8 +74,9 @@ public class AnsibleGalaxyPathUtils
   public String versionListPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
+    String page = StringUtils.defaultIfBlank(matcherState.getTokens().get("pagenum"), "1");
 
-    return String.format("%s/%s/versions", author, module);
+    return String.format("%s/%s/versions%s", author, module, page);
   }
 
   public String versionPath(final State matcherState) {
@@ -83,5 +97,31 @@ public class AnsibleGalaxyPathUtils
 
   public AnsibleGalaxyAttributes getAttributesFromMatcherState(final TokenMatcher.State state) {
     return new AnsibleGalaxyAttributes(author(state), module(state), version(state));
+  }
+
+  /**
+   * Returns relative URI, including query parameters.
+   */
+  public static String getUri(final Request request) {
+    StringBuilder sb = new StringBuilder(request.getPath());
+    Parameters params = request.getParameters();
+    if (null != params) {
+      int index = 0;
+
+      for (Entry<String, String> param : params) {
+        if (index == 0) {
+          sb.append("?");
+        }
+        else {
+          sb.append("&");
+        }
+        sb.append(param.getKey()).append("=").append(param.getValue());
+      }
+    }
+
+    String result = sb.toString();
+    LOG.trace("uri: {}", result);
+
+    return result;
   }
 }
