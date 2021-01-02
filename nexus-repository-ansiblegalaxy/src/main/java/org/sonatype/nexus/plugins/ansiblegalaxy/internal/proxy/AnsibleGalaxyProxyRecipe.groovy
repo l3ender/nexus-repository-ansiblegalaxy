@@ -76,6 +76,7 @@ extends AnsibleGalaxyRecipeSupport {
     [
       apiInternalsMatcher(),
       collectionVersionListMatcher(),
+      roleVersionListMatcher(),
       collectionVersionMatcher(),
       artifactMatcher()
     ].each { matcher ->

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,6 +39,8 @@ import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchMetadata;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
+import org.sonatype.nexus.repository.view.Parameters;
+import org.sonatype.nexus.repository.view.Request;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
@@ -93,9 +96,9 @@ public class AnsibleGalaxyProxyFacetImpl
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case COLLECTION_VERSION_LIST:
+      case VERSION_LIST:
         return getAsset(ansiblegalaxyPathUtils.versionListPath(matcherState));
-      case COLLECTION_VERSION:
+      case VERSION:
         return getAsset(ansiblegalaxyPathUtils.versionPath(matcherState));
       case ARTIFACT:
         return getAsset(ansiblegalaxyPathUtils.artifactPath(matcherState));
@@ -125,9 +128,9 @@ public class AnsibleGalaxyProxyFacetImpl
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case COLLECTION_VERSION_LIST:
+      case VERSION_LIST:
         return putAsset(content, ansiblegalaxyPathUtils.versionListPath(matcherState), assetKind);
-      case COLLECTION_VERSION:
+      case VERSION:
         return putComponent(ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState), content,
             ansiblegalaxyPathUtils.versionPath(matcherState), assetKind);
       case ARTIFACT:
@@ -205,8 +208,35 @@ public class AnsibleGalaxyProxyFacetImpl
 
   @Override
   protected String getUrl(@Nonnull final Context context) {
-    String url = AnsibleGalaxyPathUtils.getUri(context.getRequest()).substring(1);
-    log.debug("url: {}", url);
-    return url;
+    String uri = getUri(context.getRequest()).substring(1);
+    log.debug("uri for upstream request: {}", uri);
+    return uri;
   }
+
+  /**
+   * Returns relative URI, including query parameters.
+   */
+  private static String getUri(final Request request) {
+    StringBuilder sb = new StringBuilder(request.getPath());
+    Parameters params = request.getParameters();
+    if (null != params) {
+      int index = 0;
+
+      for (Entry<String, String> param : params) {
+        if (index == 0) {
+          sb.append("?");
+        }
+        else {
+          sb.append("&");
+        }
+        sb.append(param.getKey()).append("=").append(param.getValue());
+        index++;
+      }
+    }
+
+    String result = sb.toString();
+
+    return result;
+  }
+
 }

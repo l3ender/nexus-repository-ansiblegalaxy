@@ -138,14 +138,11 @@ extends RecipeSupport {
   static Matcher collectionVersionListMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
-        LogicMatchers.or(
-        new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/?page={pagenum}"),
-        new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/")
-        ),
+        new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/", [page: "pagenum"]),
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_VERSION_LIST)
+            context.attributes.set(AssetKind.class, AssetKind.VERSION_LIST)
             return true
           }
         }
@@ -159,7 +156,21 @@ extends RecipeSupport {
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_VERSION)
+            context.attributes.set(AssetKind.class, AssetKind.VERSION)
+            return true
+          }
+        }
+        )
+  }
+
+  static Matcher roleVersionListMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(GET, HEAD),
+        new QueryTokenMatcher("/api/{apiversion}/roles/", [owner__username: "author", name: "module"]),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, AssetKind.VERSION_LIST)
             return true
           }
         }
