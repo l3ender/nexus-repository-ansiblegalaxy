@@ -32,12 +32,11 @@ public class JsonPrependContentReplacer
   }
 
   @Override
-  protected String getUpdatedContent(JsonNode item) {
-    String text = item.get(jsonFieldName).asText();
-    if (null != text) { // TODO check not working
-      return prepend + text;
+  protected String getUpdatedContent(JsonNode field) {
+    if (field.isNull()) {
+      return null;
     }
-    return text;
+    return prepend + field.asText();
   }
 
 }

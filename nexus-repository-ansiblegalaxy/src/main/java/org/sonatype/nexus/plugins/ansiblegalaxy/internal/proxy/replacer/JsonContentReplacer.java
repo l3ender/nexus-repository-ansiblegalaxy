@@ -34,9 +34,7 @@ public abstract class JsonContentReplacer
   private void updateFields(JsonNode item) {
     if (item.has(jsonFieldName)) {
       log.trace("updating {}", jsonFieldName);
-      String updated = getUpdatedContent(item);
-      // String old = item.get(jsonFieldName).asText();
-      // String updated = old.replaceAll(search, replace);
+      String updated = getUpdatedContent(item.get(jsonFieldName));
       ((ObjectNode) item).put(jsonFieldName, updated);
     }
 

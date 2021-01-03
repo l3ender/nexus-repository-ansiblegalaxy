@@ -33,7 +33,7 @@ public class JsonContentReplacerTest
   private static final String PREPEND = "123";
 
   private static final String JSON =
-      "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"abc\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"abc\"}";
+      "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"abc\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"abc\",\"nullprop\":null}";
 
   @Test(expected = IOException.class)
   public void testInvalidJson() throws IOException {
@@ -68,11 +68,18 @@ public class JsonContentReplacerTest
   }
 
   @Test
+  public void testNullProp() throws IOException {
+    String result = new JsonPrependContentReplacer("nullprop", PREPEND).getReplacedContent(JSON);
+
+    assertThat(result, is(equalTo(JSON)));
+  }
+
+  @Test
   public void testTopLevelPropReplace() throws IOException {
     String result = new JsonReplaceContentReplacer("key4", SEARCH, REPLACE).getReplacedContent(JSON);
 
     String updated =
-        "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"abc\"},\"key4\":\"xyz\",\"key5\":false,\"id\":\"abc\"}";
+        "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"abc\"},\"key4\":\"xyz\",\"key5\":false,\"id\":\"abc\",\"nullprop\":null}";
     assertThat(result, is(equalTo(updated)));
   }
 
@@ -81,7 +88,7 @@ public class JsonContentReplacerTest
     String result = new JsonReplaceContentReplacer("b", SEARCH, REPLACE).getReplacedContent(JSON);
 
     String updated =
-        "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"xyz\",\"id\":\"abc\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"abc\"}";
+        "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"xyz\",\"id\":\"abc\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"abc\",\"nullprop\":null}";
     assertThat(result, is(equalTo(updated)));
   }
 
@@ -90,7 +97,7 @@ public class JsonContentReplacerTest
     String result = new JsonReplaceContentReplacer("id", SEARCH, REPLACE).getReplacedContent(JSON);
 
     String updated =
-        "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"xyz\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"xyz\"}";
+        "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"xyz\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"xyz\",\"nullprop\":null}";
     assertThat(result, is(equalTo(updated)));
   }
 
@@ -99,7 +106,7 @@ public class JsonContentReplacerTest
     String result = new JsonPrependContentReplacer("id", PREPEND).getReplacedContent(JSON);
 
     String updated =
-        "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"123abc\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"123abc\"}";
+        "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"123abc\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"123abc\",\"nullprop\":null}";
     assertThat(result, is(equalTo(updated)));
   }
 

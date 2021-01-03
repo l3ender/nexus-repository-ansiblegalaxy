@@ -35,12 +35,11 @@ public class JsonReplaceContentReplacer
   }
 
   @Override
-  protected String getUpdatedContent(JsonNode item) {
-    String text = item.get(jsonFieldName).asText();
-    if (null != text) {
-      return text.replaceAll(search, replace);
+  protected String getUpdatedContent(JsonNode field) {
+    if (field.isNull()) {
+      return null;
     }
-    return text;
+    return field.asText().replaceAll(search, replace);
   }
 
 }
