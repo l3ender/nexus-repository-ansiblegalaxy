@@ -208,7 +208,7 @@ extends RecipeSupport {
   static Matcher roleArtifactMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/download/{author}/{module}/{version}.tar.gz"),
+        new TokenMatcher("/download/{author}/{module}/archive/{version}.tar.gz"),
         new Matcher() {
           @Override
           boolean matches(final Context context) {
