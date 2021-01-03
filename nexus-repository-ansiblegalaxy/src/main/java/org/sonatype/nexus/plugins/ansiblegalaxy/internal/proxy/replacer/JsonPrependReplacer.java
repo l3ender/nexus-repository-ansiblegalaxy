@@ -12,26 +12,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Example:
  * 
  * <pre>
- * String json; // {"foo": "123 abc"}
+ * String json; // {"foo": "abc"}
  * 
- * String updated = new JsonReplaceContentReplacer("foo", "abc", "xyz").getReplacedContent(json);
- * // output: {"foo": "123 xyz"}
+ * String updated = new JsonPrependReplacer("foo", "123").getReplacedContent(json);
+ * // output: {"foo": "123abc"}
  * </pre>
  * 
  * All values in JSON (regardless of where field nested level) will be updated.
  */
-public class JsonReplaceContentReplacer
-    extends JsonContentReplacer
+public class JsonPrependReplacer
+    extends JsonReplacer
 {
 
-  private final String search;
+  private final String prepend;
 
-  private final String replace;
-
-  public JsonReplaceContentReplacer(String jsonFieldName, String search, String replace) {
+  public JsonPrependReplacer(String jsonFieldName, String prepend) {
     super(jsonFieldName);
-    this.search = checkNotNull(search);
-    this.replace = checkNotNull(replace);
+    this.prepend = checkNotNull(prepend);
   }
 
   @Override
@@ -39,7 +36,12 @@ public class JsonReplaceContentReplacer
     if (field.isNull()) {
       return null;
     }
-    return field.asText().replaceAll(search, replace);
+    return prepend + field.asText();
+  }
+
+  @Override
+  public String toString() {
+    return "prepend=" + prepend + ", " + super.toString();
   }
 
 }

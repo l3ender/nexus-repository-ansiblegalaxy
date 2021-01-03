@@ -24,8 +24,9 @@ import javax.inject.Named;
 import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
-import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonPrependContentReplacer;
-import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.StringContentReplacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonPrependReplacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.ReplacerStream;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.StringReplacer;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyDataAccess;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils;
 import org.sonatype.nexus.repository.cache.CacheInfo;
@@ -177,12 +178,14 @@ public class AnsibleGalaxyProxyFacetImpl
       return in; // do not modify
     }
     else if (assetKind == AssetKind.ROLE_VERSION_LIST) {
-      return new JsonPrependContentReplacer("next_link", "/repository/" + getRepository().getName())
-          .getReplacedContent(in);
+      JsonPrependReplacer pageReplacer =
+          new JsonPrependReplacer("next_link", "/repository/" + getRepository().getName());
+      return new ReplacerStream(pageReplacer).getReplacedContent(in);
     }
 
     // default: replace all upstream URLs with repo URLs
-    return new StringContentReplacer(getRemoteUrl().toString(), getRepository().getUrl() + "/").getReplacedContent(in);
+    StringReplacer urlReplacer = new StringReplacer(getRemoteUrl().toString(), getRepository().getUrl() + "/");
+    return new ReplacerStream(urlReplacer).getReplacedContent(in);
   }
 
   @Override

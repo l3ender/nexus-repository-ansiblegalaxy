@@ -8,22 +8,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public abstract class JsonContentReplacer
-    extends ContentReplacer
+public abstract class JsonReplacer
+    extends Replacer
 {
 
   private static final ObjectMapper MAPPER = new ObjectMapper(); // thread safe object
 
   protected final String jsonFieldName;
 
-  public JsonContentReplacer(String jsonFieldName) {
+  public JsonReplacer(String jsonFieldName) {
     this.jsonFieldName = checkNotNull(jsonFieldName);
   }
 
   protected abstract String getUpdatedContent(JsonNode item);
 
   @Override
-  protected String getReplacedContent(String input) throws IOException {
+  public String getReplacedContent(String input) throws IOException {
     JsonNode tree = MAPPER.readTree(input);
 
     updateFields(tree);
@@ -42,6 +42,11 @@ public abstract class JsonContentReplacer
     for (JsonNode child : item) {
       updateFields(child);
     }
+  }
+
+  @Override
+  public String toString() {
+    return "jsonFieldName=" + jsonFieldName;
   }
 
 }
