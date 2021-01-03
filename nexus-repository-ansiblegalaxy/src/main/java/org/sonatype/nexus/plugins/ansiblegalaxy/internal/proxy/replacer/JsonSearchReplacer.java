@@ -14,13 +14,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <pre>
  * String json; // {"foo": "123 abc"}
  * 
- * String updated = new JsonContentReplacer("foo", "abc", "xyz").getReplacedContent(json);
+ * String updated = new JsonSearchReplacer("foo", "abc", "xyz").getReplacedContent(json);
  * // output: {"foo": "123 xyz"}
  * </pre>
  * 
  * All values in JSON (regardless of where field nested level) will be updated.
  */
-public class JsonContentReplacer
+public class JsonSearchReplacer
     extends JsonReplacer
 {
 
@@ -28,7 +28,7 @@ public class JsonContentReplacer
 
   private final String replace;
 
-  public JsonContentReplacer(String jsonFieldName, String search, String replace) {
+  public JsonSearchReplacer(String jsonFieldName, String search, String replace) {
     super(jsonFieldName);
     this.search = checkNotNull(search);
     this.replace = checkNotNull(replace);

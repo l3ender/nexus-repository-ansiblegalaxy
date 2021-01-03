@@ -8,7 +8,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Replaces all "search" string occurrences with "replace" string value for the provided input stream.
  *
  */
-public class StringReplacer
+public class SearchReplacer
     extends Replacer
 {
 
@@ -16,7 +16,7 @@ public class StringReplacer
 
   private final String replace;
 
-  public StringReplacer(String search, String replace) {
+  public SearchReplacer(String search, String replace) {
     this.search = checkNotNull(search);
     this.replace = checkNotNull(replace);
   }

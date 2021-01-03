@@ -23,14 +23,14 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class StringReplacerTest
+public class SearchReplacerTest
     extends TestSupport
 {
-  private StringReplacer underTest;
+  private SearchReplacer underTest;
 
   @Before
   public void setUp() {
-    underTest = new StringReplacer("abc", "xyz");
+    underTest = new SearchReplacer("abc", "xyz");
   }
 
   @Test

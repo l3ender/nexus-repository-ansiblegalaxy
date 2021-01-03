@@ -24,10 +24,10 @@ import javax.inject.Named;
 import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
-import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonContentReplacer;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonPrependReplacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonSearchReplacer;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.ReplacerStream;
-import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.StringReplacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.SearchReplacer;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyDataAccess;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils;
 import org.sonatype.nexus.repository.cache.CacheInfo;
@@ -181,13 +181,16 @@ public class AnsibleGalaxyProxyFacetImpl
     else if (assetKind == AssetKind.ROLE_VERSION_LIST) {
       JsonPrependReplacer pageReplacer =
           new JsonPrependReplacer("next_link", "/repository/" + getRepository().getName());
-      JsonContentReplacer downloadReplacer =
-          new JsonContentReplacer("download_url", "https://github.com", getRepository().getUrl() + "/download");
+
+      // TODO: configurable url for download (default to github)
+      JsonSearchReplacer downloadReplacer =
+          new JsonSearchReplacer("download_url", "https://github.com", getRepository().getUrl() + "/download");
+
       return new ReplacerStream(pageReplacer, downloadReplacer).getReplacedContent(in);
     }
 
     // default: replace all upstream URLs with repo URLs
-    StringReplacer urlReplacer = new StringReplacer(getRemoteUrl().toString(), getRepository().getUrl() + "/");
+    SearchReplacer urlReplacer = new SearchReplacer(getRemoteUrl().toString(), getRepository().getUrl() + "/");
     return new ReplacerStream(urlReplacer).getReplacedContent(in);
   }
 
