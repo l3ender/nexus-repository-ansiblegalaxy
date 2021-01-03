@@ -85,11 +85,11 @@ public class AnsibleGalaxyPathUtils
     return String.format("%s/%s/info%s", author, module, page);
   }
 
-  public String idPagedPath(final State matcherState) {
+  public String roleMetadataPagedPath(final State matcherState) {
     String id = id(matcherState);
     String page = StringUtils.defaultIfBlank(matcherState.getTokens().get("pagenum"), "1");
 
-    return String.format("%s/info%s", id, page);
+    return String.format("metadata/role/%s/info%s", id, page);
   }
 
   public String versionPath(final State matcherState) {
