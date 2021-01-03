@@ -12,6 +12,8 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.util;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,6 +80,78 @@ public class AnsibleGalaxyPathUtilsTest
     String result = underTest.artifactPath(state);
 
     assertThat(result, is(equalTo("azure/azcollection/1.2.0/artifact")));
+  }
+
+  private static final String ORIG_UPSTREAM_URL =
+      "https://galaxy.ansible.com/download/role/geerlingguy/ansible-role-jenkins/archive/3.0.0.tar.gz";
+
+  private static final String REAL_UPSTREAM_PATH = "/geerlingguy/ansible-role-jenkins/archive/3.0.0.tar.gz";
+
+  @Test
+  public void roleDownloadUrlDefault() throws URISyntaxException {
+    String desiredDownloadUrl = "https://github.com";
+    URI originalDownloadUri = new URI(ORIG_UPSTREAM_URL);
+    URI updatedDownloadUri = underTest.rebuildRoleDownloadUri(originalDownloadUri, desiredDownloadUrl);
+
+    assertThat(updatedDownloadUri.toString(), is(equalTo("https://github.com" + REAL_UPSTREAM_PATH)));
+  }
+
+  @Test
+  public void roleDownloadUrlTrailingSlash() throws URISyntaxException {
+    String desiredDownloadUrl = "https://github.com/";
+    URI originalDownloadUri = new URI(ORIG_UPSTREAM_URL);
+    URI updatedDownloadUri = underTest.rebuildRoleDownloadUri(originalDownloadUri, desiredDownloadUrl);
+
+    assertThat(updatedDownloadUri.toString(), is(equalTo("https://github.com" + REAL_UPSTREAM_PATH)));
+  }
+
+  @Test
+  public void roleDownloadUrlCustomHost() throws URISyntaxException {
+    String desiredDownloadUrl = "http://custom.example.local";
+    URI originalDownloadUri = new URI(ORIG_UPSTREAM_URL);
+    URI updatedDownloadUri = underTest.rebuildRoleDownloadUri(originalDownloadUri, desiredDownloadUrl);
+
+    assertThat(updatedDownloadUri.toString(), is(equalTo("http://custom.example.local" + REAL_UPSTREAM_PATH)));
+  }
+
+  @Test
+  public void roleDownloadUrlCustomHostSinglePath() throws URISyntaxException {
+    String desiredDownloadUrl = "http://custom.example.local/artifacts";
+    URI originalDownloadUri = new URI(ORIG_UPSTREAM_URL);
+    URI updatedDownloadUri = underTest.rebuildRoleDownloadUri(originalDownloadUri, desiredDownloadUrl);
+
+    assertThat(updatedDownloadUri.toString(),
+        is(equalTo("http://custom.example.local/artifacts" + REAL_UPSTREAM_PATH)));
+  }
+
+  @Test
+  public void roleDownloadUrlCustomHostSinglePathTraillingSlash() throws URISyntaxException {
+    String desiredDownloadUrl = "http://custom.example.local/artifacts/";
+    URI originalDownloadUri = new URI(ORIG_UPSTREAM_URL);
+    URI updatedDownloadUri = underTest.rebuildRoleDownloadUri(originalDownloadUri, desiredDownloadUrl);
+
+    assertThat(updatedDownloadUri.toString(),
+        is(equalTo("http://custom.example.local/artifacts" + REAL_UPSTREAM_PATH)));
+  }
+
+  @Test
+  public void roleDownloadUrlCustomHostMultiPath() throws URISyntaxException {
+    String desiredDownloadUrl = "http://custom.example.local/artifacts/other";
+    URI originalDownloadUri = new URI(ORIG_UPSTREAM_URL);
+    URI updatedDownloadUri = underTest.rebuildRoleDownloadUri(originalDownloadUri, desiredDownloadUrl);
+
+    assertThat(updatedDownloadUri.toString(),
+        is(equalTo("http://custom.example.local/artifacts/other" + REAL_UPSTREAM_PATH)));
+  }
+
+  @Test
+  public void roleDownloadUrlCustomHostMultiPathTrailingSlash() throws URISyntaxException {
+    String desiredDownloadUrl = "http://custom.example.local/artifacts/other/";
+    URI originalDownloadUri = new URI(ORIG_UPSTREAM_URL);
+    URI updatedDownloadUri = underTest.rebuildRoleDownloadUri(originalDownloadUri, desiredDownloadUrl);
+
+    assertThat(updatedDownloadUri.toString(),
+        is(equalTo("http://custom.example.local/artifacts/other" + REAL_UPSTREAM_PATH)));
   }
 
 }

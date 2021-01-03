@@ -12,6 +12,9 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.util;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -22,6 +25,7 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,6 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Singleton
 public class AnsibleGalaxyPathUtils
 {
+
+  public static final String ROLE_ARTIFACT_URI_PREFIX = "/download/role";
 
   private final Logger log = Loggers.getLogger(getClass());
 
@@ -105,4 +111,43 @@ public class AnsibleGalaxyPathUtils
   public AnsibleGalaxyAttributes getAttributesFromMatcherState(final TokenMatcher.State state) {
     return new AnsibleGalaxyAttributes(author(state), module(state), version(state));
   }
+
+  /**
+   * Used by proxy handler to send request to actual/real download location, which can be different than the proxy
+   * repo's upstream endpoint.
+   * 
+   * @param originalUpstream example:
+   *          https://galaxy.ansible.com/download/role/geerlingguy/ansible-role-jenkins/archive/3.0.0.tar.gz
+   * @param desiredUpstreamUrl example: https://github.com
+   * @return example: https://github.com/geerlingguy/ansible-role-jenkins/archive/3.0.0.tar.gz
+   */
+  public URI rebuildRoleDownloadUri(URI originalUpstream, String desiredUpstreamUrl) {
+    final String schemeSeparator = "://";
+    String desiredScheme = StringUtils.substringBefore(desiredUpstreamUrl, schemeSeparator);
+    String desiredUrlWithoutScheme = StringUtils.substringAfter(desiredUpstreamUrl, schemeSeparator);
+
+    final String pathSeparator = "/";
+    String desiredHost = StringUtils.substringBefore(desiredUrlWithoutScheme, pathSeparator);
+    String desiredPath = StringUtils.substringAfter(desiredUrlWithoutScheme, pathSeparator);
+
+    if (desiredPath.endsWith(pathSeparator)) {
+      desiredPath = StringUtils.chop(desiredPath);
+    }
+
+    String upstreamPath = originalUpstream.getPath().replaceFirst(ROLE_ARTIFACT_URI_PREFIX, "");
+
+    String path = upstreamPath;
+    if (StringUtils.isNotBlank(desiredPath)) {
+      path = "/" + desiredPath + path;
+    }
+
+    try {
+      return new URIBuilder(originalUpstream).setScheme(desiredScheme).setHost(desiredHost).setPath(path).build();
+    }
+    catch (URISyntaxException e) {
+      log.error("cannot update http request from {} -> {}", originalUpstream, desiredUpstreamUrl, e);
+      return originalUpstream;
+    }
+  }
+
 }

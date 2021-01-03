@@ -49,6 +49,7 @@ import org.sonatype.nexus.repository.view.matchers.ActionMatcher
 import org.sonatype.nexus.repository.view.matchers.logic.LogicMatchers
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
 
+import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_ARTIFACT_URI_PREFIX
 import static org.sonatype.nexus.repository.http.HttpMethods.GET
 import static org.sonatype.nexus.repository.http.HttpMethods.HEAD
 
@@ -208,7 +209,7 @@ extends RecipeSupport {
   static Matcher roleArtifactMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/download/{author}/{module}/archive/{version}.tar.gz"),
+        new TokenMatcher(ROLE_ARTIFACT_URI_PREFIX + "/{author}/{module}/archive/{version}.tar.gz"),
         new Matcher() {
           @Override
           boolean matches(final Context context) {

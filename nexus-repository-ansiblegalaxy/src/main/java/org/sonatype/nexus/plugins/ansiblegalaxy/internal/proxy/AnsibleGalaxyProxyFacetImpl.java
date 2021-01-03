@@ -14,6 +14,7 @@ package org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -47,10 +48,12 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 
+import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyDataAccess.HASH_ALGORITHMS;
+import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_ARTIFACT_URI_PREFIX;
 
 /**
  * AnsibleGalaxy {@link ProxyFacet} implementation.
@@ -179,12 +182,13 @@ public class AnsibleGalaxyProxyFacetImpl
       return in; // do not modify
     }
     else if (assetKind == AssetKind.ROLE_VERSION_LIST) {
+      // add nxrm context path to paging URI:
       JsonPrependReplacer pageReplacer =
           new JsonPrependReplacer("next_link", "/repository/" + getRepository().getName());
 
-      // TODO: configurable url for download (default to github)
-      JsonSearchReplacer downloadReplacer =
-          new JsonSearchReplacer("download_url", "https://github.com", getRepository().getUrl() + "/download");
+      // replace artifact download links so they are handled by this proxy repo:
+      JsonSearchReplacer downloadReplacer = new JsonSearchReplacer("download_url", getRoleArtifactUpstreamUrl(),
+          getRepository().getUrl() + ROLE_ARTIFACT_URI_PREFIX);
 
       return new ReplacerStream(pageReplacer, downloadReplacer).getReplacedContent(in);
     }
@@ -239,6 +243,22 @@ public class AnsibleGalaxyProxyFacetImpl
     }
 
     return sb.toString();
+  }
+
+  @Override
+  protected HttpRequestBase buildFetchHttpRequest(URI uri, Context context) {
+    if (context.getRequest().getPath().startsWith(ROLE_ARTIFACT_URI_PREFIX)) {
+      log.debug("rebuilding role artifact request for {}; orig = {}", context.getRequest(), uri);
+      URI newUri = ansiblegalaxyPathUtils.rebuildRoleDownloadUri(uri, getRoleArtifactUpstreamUrl());
+      log.debug("updated fetch request: {} -> {}", uri, newUri);
+      return super.buildFetchHttpRequest(newUri, context);
+    }
+    return super.buildFetchHttpRequest(uri, context);
+  }
+
+  private String getRoleArtifactUpstreamUrl() {
+    // TODO: this should be a configurable repository item entered by user on UI
+    return "https://github.com";
   }
 
 }
