@@ -142,7 +142,7 @@ extends RecipeSupport {
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.VERSION_LIST)
+            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_VERSION_LIST)
             return true
           }
         }
@@ -156,7 +156,35 @@ extends RecipeSupport {
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.VERSION)
+            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_VERSION)
+            return true
+          }
+        }
+        )
+  }
+
+  static Matcher collectionArtifactMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(GET, HEAD),
+        new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, AssetKind.ARTIFACT)
+            return true
+          }
+        }
+        )
+  }
+
+  static Matcher roleMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(GET, HEAD),
+        new QueryTokenMatcher("/api/{apiversion}/roles/", [owner__username: "author", name: "module"]),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, AssetKind.ROLE)
             return true
           }
         }
@@ -166,25 +194,11 @@ extends RecipeSupport {
   static Matcher roleVersionListMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
-        new QueryTokenMatcher("/api/{apiversion}/roles/", [owner__username: "author", name: "module"]),
+        new QueryTokenMatcher("/api/{apiversion}/roles/{id}/versions/", [page: "pagenum"]),
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.VERSION_LIST)
-            return true
-          }
-        }
-        )
-  }
-
-  static Matcher artifactMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
-        new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.ARTIFACT)
+            context.attributes.set(AssetKind.class, AssetKind.ROLE_VERSION_LIST)
             return true
           }
         }

@@ -51,9 +51,9 @@ public class AnsibleGalaxyPathUtilsTest
 
   @Test
   public void versionListPath() {
-    String result = underTest.versionListPath(state);
+    String result = underTest.modulePagedPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/versions1")));
+    assertThat(result, is(equalTo("azure/azcollection/info1")));
   }
 
   @Test
@@ -61,16 +61,16 @@ public class AnsibleGalaxyPathUtilsTest
     Map<String, String> tokens = defaultTokens();
     tokens.put("pagenum", "3");
     when(state.getTokens()).thenReturn(tokens);
-    String result = underTest.versionListPath(state);
+    String result = underTest.modulePagedPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/versions3")));
+    assertThat(result, is(equalTo("azure/azcollection/info3")));
   }
 
   @Test
   public void versionPath() {
     String result = underTest.versionPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/1.2.0/version")));
+    assertThat(result, is(equalTo("azure/azcollection/1.2.0/info")));
   }
 
   @Test

@@ -51,6 +51,10 @@ public class AnsibleGalaxyPathUtils
     return match(state, "version");
   }
 
+  public String id(final TokenMatcher.State state) {
+    return match(state, "id");
+  }
+
   public TokenMatcher.State matcherState(final Context context) {
     State state = context.getAttributes().require(TokenMatcher.State.class);
     log.info("matched state tokens: {}", state.getTokens());
@@ -67,12 +71,19 @@ public class AnsibleGalaxyPathUtils
     return result;
   }
 
-  public String versionListPath(final State matcherState) {
+  public String modulePagedPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
     String page = StringUtils.defaultIfBlank(matcherState.getTokens().get("pagenum"), "1");
 
-    return String.format("%s/%s/versions%s", author, module, page);
+    return String.format("%s/%s/info%s", author, module, page);
+  }
+
+  public String idPagedPath(final State matcherState) {
+    String id = id(matcherState);
+    String page = StringUtils.defaultIfBlank(matcherState.getTokens().get("pagenum"), "1");
+
+    return String.format("%s/info%s", id, page);
   }
 
   public String versionPath(final State matcherState) {
@@ -80,7 +91,7 @@ public class AnsibleGalaxyPathUtils
     String module = module(matcherState);
     String version = version(matcherState);
 
-    return String.format("%s/%s/%s/version", author, module, version);
+    return String.format("%s/%s/%s/info", author, module, version);
   }
 
   public String artifactPath(final State matcherState) {

@@ -76,9 +76,10 @@ extends AnsibleGalaxyRecipeSupport {
     [
       apiInternalsMatcher(),
       collectionVersionListMatcher(),
-      roleVersionListMatcher(),
       collectionVersionMatcher(),
-      artifactMatcher()
+      collectionArtifactMatcher(),
+      roleMatcher(),
+      roleVersionListMatcher()
     ].each { matcher ->
       builder.route(new Route.Builder().matcher(matcher)
           .handler(timingHandler)

@@ -14,9 +14,7 @@ package org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,6 +24,8 @@ import javax.inject.Named;
 import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonPrependContentReplacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.StringContentReplacer;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyDataAccess;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils;
 import org.sonatype.nexus.repository.cache.CacheInfo;
@@ -45,10 +45,6 @@ import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 
-import com.google.common.base.Strings;
-import com.google.common.io.CharSource;
-import com.google.common.io.CharStreams;
-import org.apache.commons.io.input.ReaderInputStream;
 import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -96,10 +92,13 @@ public class AnsibleGalaxyProxyFacetImpl
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case VERSION_LIST:
-        return getAsset(ansiblegalaxyPathUtils.versionListPath(matcherState));
-      case VERSION:
+      case ROLE:
+      case COLLECTION_VERSION_LIST:
+        return getAsset(ansiblegalaxyPathUtils.modulePagedPath(matcherState));
+      case COLLECTION_VERSION:
         return getAsset(ansiblegalaxyPathUtils.versionPath(matcherState));
+      case ROLE_VERSION_LIST:
+        return getAsset(ansiblegalaxyPathUtils.idPagedPath(matcherState));
       case ARTIFACT:
         return getAsset(ansiblegalaxyPathUtils.artifactPath(matcherState));
       default:
@@ -128,11 +127,14 @@ public class AnsibleGalaxyProxyFacetImpl
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case VERSION_LIST:
-        return putAsset(content, ansiblegalaxyPathUtils.versionListPath(matcherState), assetKind);
-      case VERSION:
+      case ROLE:
+      case COLLECTION_VERSION_LIST:
+        return putAsset(content, ansiblegalaxyPathUtils.modulePagedPath(matcherState), assetKind);
+      case COLLECTION_VERSION:
         return putComponent(ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState), content,
             ansiblegalaxyPathUtils.versionPath(matcherState), assetKind);
+      case ROLE_VERSION_LIST:
+        return putAsset(content, ansiblegalaxyPathUtils.idPagedPath(matcherState), assetKind);
       case ARTIFACT:
         return putComponent(ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState), content,
             ansiblegalaxyPathUtils.artifactPath(matcherState), assetKind);
@@ -174,13 +176,13 @@ public class AnsibleGalaxyProxyFacetImpl
     if (assetKind == AssetKind.ARTIFACT) {
       return in; // do not modify
     }
-    String content =
-        Strings.nullToEmpty(CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8))).trim();
-    String repoAbsoluteUrl = getRepository().getUrl() + "/";
-    String remoteUrl = getRemoteUrl().toString();
-    String replacedContent = content.replaceAll(remoteUrl, repoAbsoluteUrl);
-    log.trace("content replace:\n\t---> old: {}\n\t---> new: {}", content, replacedContent);
-    return new ReaderInputStream(CharSource.wrap(replacedContent).openStream(), StandardCharsets.UTF_8);
+    else if (assetKind == AssetKind.ROLE_VERSION_LIST) {
+      return new JsonPrependContentReplacer("next_link", "/repository/" + getRepository().getName())
+          .getReplacedContent(in);
+    }
+
+    // default: replace all upstream URLs with repo URLs
+    return new StringContentReplacer(getRemoteUrl().toString(), getRepository().getUrl() + "/").getReplacedContent(in);
   }
 
   @Override
@@ -220,23 +222,14 @@ public class AnsibleGalaxyProxyFacetImpl
     StringBuilder sb = new StringBuilder(request.getPath());
     Parameters params = request.getParameters();
     if (null != params) {
-      int index = 0;
+      sb.append("?");
 
-      for (Entry<String, String> param : params) {
-        if (index == 0) {
-          sb.append("?");
-        }
-        else {
-          sb.append("&");
-        }
-        sb.append(param.getKey()).append("=").append(param.getValue());
-        index++;
-      }
+      String queryString = params.entries().stream().map(param -> param.getKey() + "=" + param.getValue())
+          .collect(Collectors.joining("&"));
+      sb.append(queryString);
     }
 
-    String result = sb.toString();
-
-    return result;
+    return sb.toString();
   }
 
 }
