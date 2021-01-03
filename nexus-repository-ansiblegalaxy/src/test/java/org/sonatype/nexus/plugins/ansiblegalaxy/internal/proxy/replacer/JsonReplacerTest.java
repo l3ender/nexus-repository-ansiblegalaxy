@@ -39,7 +39,7 @@ public class JsonReplacerTest
   public void testInvalidJson() throws IOException {
     String input = "abc 123";
 
-    String result = new JsonReplaceReplacer("prop", SEARCH, REPLACE).getReplacedContent(input);
+    String result = new JsonContentReplacer("prop", SEARCH, REPLACE).getReplacedContent(input);
 
     assertThat(result, is(equalTo(input)));
   }
@@ -48,21 +48,21 @@ public class JsonReplacerTest
   public void testEmptyJson() throws IOException {
     String input = "{}";
 
-    String result = new JsonReplaceReplacer("prop", SEARCH, REPLACE).getReplacedContent(input);
+    String result = new JsonContentReplacer("prop", SEARCH, REPLACE).getReplacedContent(input);
 
     assertThat(result, is(equalTo("{}")));
   }
 
   @Test
   public void testPropNotFound() throws IOException {
-    String result = new JsonReplaceReplacer("prop", SEARCH, REPLACE).getReplacedContent(JSON);
+    String result = new JsonContentReplacer("prop", SEARCH, REPLACE).getReplacedContent(JSON);
 
     assertThat(result, is(equalTo(JSON)));
   }
 
   @Test
   public void testTopLevelPropNoReplace() throws IOException {
-    String result = new JsonReplaceReplacer("key1", SEARCH, REPLACE).getReplacedContent(JSON);
+    String result = new JsonContentReplacer("key1", SEARCH, REPLACE).getReplacedContent(JSON);
 
     assertThat(result, is(equalTo(JSON)));
   }
@@ -76,7 +76,7 @@ public class JsonReplacerTest
 
   @Test
   public void testTopLevelPropReplace() throws IOException {
-    String result = new JsonReplaceReplacer("key4", SEARCH, REPLACE).getReplacedContent(JSON);
+    String result = new JsonContentReplacer("key4", SEARCH, REPLACE).getReplacedContent(JSON);
 
     String updated =
         "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"abc\"},\"key4\":\"xyz\",\"key5\":false,\"id\":\"abc\",\"nullprop\":null}";
@@ -85,7 +85,7 @@ public class JsonReplacerTest
 
   @Test
   public void testNestedLevelPropReplace() throws IOException {
-    String result = new JsonReplaceReplacer("b", SEARCH, REPLACE).getReplacedContent(JSON);
+    String result = new JsonContentReplacer("b", SEARCH, REPLACE).getReplacedContent(JSON);
 
     String updated =
         "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"xyz\",\"id\":\"abc\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"abc\",\"nullprop\":null}";
@@ -94,7 +94,7 @@ public class JsonReplacerTest
 
   @Test
   public void testMultiplePropReplace() throws IOException {
-    String result = new JsonReplaceReplacer("id", SEARCH, REPLACE).getReplacedContent(JSON);
+    String result = new JsonContentReplacer("id", SEARCH, REPLACE).getReplacedContent(JSON);
 
     String updated =
         "{\"key1\":\"value1\",\"key2\":1,\"key3\":{\"a\":true,\"b\":\"abc\",\"id\":\"xyz\"},\"key4\":\"abc\",\"key5\":false,\"id\":\"xyz\",\"nullprop\":null}";

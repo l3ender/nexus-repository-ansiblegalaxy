@@ -24,6 +24,7 @@ import javax.inject.Named;
 import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonContentReplacer;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonPrependReplacer;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.ReplacerStream;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.StringReplacer;
@@ -180,7 +181,9 @@ public class AnsibleGalaxyProxyFacetImpl
     else if (assetKind == AssetKind.ROLE_VERSION_LIST) {
       JsonPrependReplacer pageReplacer =
           new JsonPrependReplacer("next_link", "/repository/" + getRepository().getName());
-      return new ReplacerStream(pageReplacer).getReplacedContent(in);
+      JsonContentReplacer downloadReplacer =
+          new JsonContentReplacer("download_url", "https://github.com", getRepository().getUrl() + "/download");
+      return new ReplacerStream(pageReplacer, downloadReplacer).getReplacedContent(in);
     }
 
     // default: replace all upstream URLs with repo URLs
