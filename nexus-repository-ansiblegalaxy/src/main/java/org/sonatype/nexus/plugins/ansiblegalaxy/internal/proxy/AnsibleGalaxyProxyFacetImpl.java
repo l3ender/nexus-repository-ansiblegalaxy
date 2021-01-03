@@ -230,7 +230,7 @@ public class AnsibleGalaxyProxyFacetImpl
   private static String getUri(final Request request) {
     StringBuilder sb = new StringBuilder(request.getPath());
     Parameters params = request.getParameters();
-    if (null != params) {
+    if (null != params && !params.isEmpty()) {
       sb.append("?");
 
       String queryString = params.entries().stream().map(param -> param.getKey() + "=" + param.getValue())
