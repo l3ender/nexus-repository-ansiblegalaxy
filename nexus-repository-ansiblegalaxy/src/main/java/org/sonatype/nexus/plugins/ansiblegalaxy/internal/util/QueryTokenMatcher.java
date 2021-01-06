@@ -46,12 +46,13 @@ public class QueryTokenMatcher
 
     String path = context.getRequest().getPath();
     Map<String, String> requestParameters = getRequestParameters(context.getRequest().getParameters());
-    log.debug("Matching: {} ({})~={}", path, requestParameters, parser);
+    log.trace("Matching: {} ({})~={}", path, requestParameters, parser);
     final Map<String, String> tokens = parser.parse(path, requestParameters);
     if (tokens == null) {
       // There was no match.
       return false;
     }
+    log.debug("Matched: {} ({}): {}", path, requestParameters, tokens);
 
     // matched expose tokens in context
     context.getAttributes().set(State.class, new State()

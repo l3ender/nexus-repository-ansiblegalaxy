@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.sonatype.goodies.testsupport.TestSupport;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 
 import org.junit.Before;
@@ -26,6 +27,7 @@ import org.mockito.Mock;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -52,34 +54,86 @@ public class AnsibleGalaxyPathUtilsTest
   }
 
   @Test
-  public void versionListPath() {
-    String result = underTest.modulePagedPath(state);
+  public void collectionDetailPath() {
+    String result = underTest.collectionDetailPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/info1")));
+    assertThat(result, is(equalTo("collection/azure/azcollection/info.json")));
   }
 
   @Test
-  public void versionListPathPaged() {
+  public void collectionVersionListPath() {
+    String result = underTest.collectionVersionPagedPath(state);
+
+    assertThat(result, is(equalTo("collection/azure/azcollection/info1.json")));
+  }
+
+  @Test
+  public void roleVersionListPath() {
+    String result = underTest.roleDetailPagedPath(state);
+
+    assertThat(result, is(equalTo("role/azure/azcollection/info1.json")));
+  }
+
+  @Test
+  public void collectionVersionListPathPaged() {
     Map<String, String> tokens = defaultTokens();
     tokens.put("pagenum", "3");
     when(state.getTokens()).thenReturn(tokens);
-    String result = underTest.modulePagedPath(state);
+    String result = underTest.collectionVersionPagedPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/info3")));
+    assertThat(result, is(equalTo("collection/azure/azcollection/info3.json")));
   }
 
   @Test
-  public void versionPath() {
-    String result = underTest.versionPath(state);
+  public void roleVersionListPathPaged() {
+    Map<String, String> tokens = defaultTokens();
+    tokens.put("pagenum", "3");
+    when(state.getTokens()).thenReturn(tokens);
+    String result = underTest.roleDetailPagedPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/1.2.0/info")));
+    assertThat(result, is(equalTo("role/azure/azcollection/info3.json")));
   }
 
   @Test
-  public void artifactPath() {
-    String result = underTest.artifactPath(state);
+  public void collectionVersionPath() {
+    String result = underTest.collectionVersionPath(state);
 
-    assertThat(result, is(equalTo("azure/azcollection/1.2.0/artifact")));
+    assertThat(result, is(equalTo("collection/azure/azcollection/1.2.0/info.json")));
+  }
+
+  @Test
+  public void roleMetadataPagedPath() {
+    Map<String, String> tokens = new HashMap<>();
+    tokens.put("id", "555");
+    tokens.put("pagenum", "3");
+    when(state.getTokens()).thenReturn(tokens);
+    String result = underTest.roleMetadataPagedPath(state);
+
+    assertThat(result, is(equalTo("metadata/role/555/info3.json")));
+  }
+
+  @Test
+  public void collectionArtifactPath() {
+    String result = underTest.collectionArtifactPath(state);
+
+    assertThat(result, is(equalTo("collection/azure/azcollection/1.2.0/1.2.0.tar.gz")));
+  }
+
+  @Test
+  public void collectionComponentAttributes() {
+    AnsibleGalaxyAttributes result = underTest.getCollectionAttributes(state);
+
+    assertThat(result, notNullValue());
+    assertThat(result.getGroup(), is(equalTo("collection/azure")));
+    assertThat(result.getName(), is(equalTo("azcollection")));
+    assertThat(result.getVersion(), is(equalTo("1.2.0")));
+  }
+
+  @Test
+  public void roleArtifactPath() {
+    String result = underTest.roleArtifactPath(state);
+
+    assertThat(result, is(equalTo("role/azure/azcollection/1.2.0/1.2.0.tar.gz")));
   }
 
   private static final String ORIG_UPSTREAM_URL =
@@ -152,6 +206,16 @@ public class AnsibleGalaxyPathUtilsTest
 
     assertThat(updatedDownloadUri.toString(),
         is(equalTo("http://custom.example.local/artifacts/other" + REAL_UPSTREAM_PATH)));
+  }
+
+  @Test
+  public void roleComponentAttributes() {
+    AnsibleGalaxyAttributes result = underTest.getRoleAttributes(state);
+
+    assertThat(result, notNullValue());
+    assertThat(result.getGroup(), is(equalTo("role/azure")));
+    assertThat(result.getName(), is(equalTo("azcollection")));
+    assertThat(result.getVersion(), is(equalTo("1.2.0")));
   }
 
 }

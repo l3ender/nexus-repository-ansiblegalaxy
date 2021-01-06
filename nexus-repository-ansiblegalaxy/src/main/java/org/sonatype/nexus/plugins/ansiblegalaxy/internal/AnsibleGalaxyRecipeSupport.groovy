@@ -136,6 +136,20 @@ extends RecipeSupport {
         )
   }
 
+  static Matcher collectionDetailMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(GET, HEAD),
+        new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/"),
+        new Matcher() {
+          @Override
+          boolean matches(final Context context) {
+            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_DETAIL)
+            return true
+          }
+        }
+        )
+  }
+
   static Matcher collectionVersionListMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
@@ -171,21 +185,21 @@ extends RecipeSupport {
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.ARTIFACT)
+            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_ARTIFACT)
             return true
           }
         }
         )
   }
 
-  static Matcher roleMatcher() {
+  static Matcher roleDetailMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new QueryTokenMatcher("/api/{apiversion}/roles/", [owner__username: "author", name: "module"]),
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.ROLE)
+            context.attributes.set(AssetKind.class, AssetKind.ROLE_DETAIL)
             return true
           }
         }
@@ -213,7 +227,7 @@ extends RecipeSupport {
         new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.ARTIFACT)
+            context.attributes.set(AssetKind.class, AssetKind.ROLE_ARTIFACT)
             return true
           }
         }

@@ -38,6 +38,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class AnsibleGalaxyPathUtils
 {
 
+  private static final String METADATA_PATH = "metadata";
+
+  private static final String COLLECTION_PATH = "collection";
+
+  private static final String ROLE_PATH = "role";
+
   public static final String ROLE_ARTIFACT_URI_PREFIX = "/download/role";
 
   private final Logger log = Loggers.getLogger(getClass());
@@ -61,6 +67,10 @@ public class AnsibleGalaxyPathUtils
     return match(state, "id");
   }
 
+  public String page(final TokenMatcher.State state) {
+    return StringUtils.defaultIfBlank(state.getTokens().get("pagenum"), "1");
+  }
+
   public TokenMatcher.State matcherState(final Context context) {
     State state = context.getAttributes().require(TokenMatcher.State.class);
     log.info("matched state tokens: {}", state.getTokens());
@@ -77,39 +87,71 @@ public class AnsibleGalaxyPathUtils
     return result;
   }
 
-  public String modulePagedPath(final State matcherState) {
+  public String collectionDetailPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
-    String page = StringUtils.defaultIfBlank(matcherState.getTokens().get("pagenum"), "1");
 
-    return String.format("%s/%s/info%s", author, module, page);
+    return String.format("%s/%s/%s/info.json", COLLECTION_PATH, author, module);
+  }
+
+  private String modulePagedPath(final State matcherState) {
+    String author = author(matcherState);
+    String module = module(matcherState);
+    String page = page(matcherState);
+
+    return String.format("%s/%s/info%s.json", author, module, page);
+  }
+
+  public String collectionVersionPagedPath(final State matcherState) {
+    return String.format("%s/%s", COLLECTION_PATH, modulePagedPath(matcherState));
+  }
+
+  public String roleDetailPagedPath(final State matcherState) {
+    return String.format("%s/%s", ROLE_PATH, modulePagedPath(matcherState));
   }
 
   public String roleMetadataPagedPath(final State matcherState) {
     String id = id(matcherState);
-    String page = StringUtils.defaultIfBlank(matcherState.getTokens().get("pagenum"), "1");
+    String page = page(matcherState);
 
-    return String.format("metadata/role/%s/info%s", id, page);
+    return String.format("%s/%s/%s/info%s.json", METADATA_PATH, ROLE_PATH, id, page);
   }
 
-  public String versionPath(final State matcherState) {
+  public String collectionVersionPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
     String version = version(matcherState);
 
-    return String.format("%s/%s/%s/info", author, module, version);
+    return String.format("%s/%s/%s/%s/info.json", COLLECTION_PATH, author, module, version);
   }
 
-  public String artifactPath(final State matcherState) {
+  private String artifactPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
     String version = version(matcherState);
 
-    return String.format("%s/%s/%s/artifact", author, module, version);
+    return String.format("%s/%s/%s/%s.tar.gz", author, module, version, version);
   }
 
-  public AnsibleGalaxyAttributes getAttributesFromMatcherState(final TokenMatcher.State state) {
-    return new AnsibleGalaxyAttributes(author(state), module(state), version(state));
+  public String collectionArtifactPath(final State matcherState) {
+    return String.format("%s/%s", COLLECTION_PATH, artifactPath(matcherState));
+  }
+
+  public String roleArtifactPath(final State matcherState) {
+    return String.format("%s/%s", ROLE_PATH, artifactPath(matcherState));
+  }
+
+  private AnsibleGalaxyAttributes getAttributesFromMatcherState(final TokenMatcher.State state, String groupPath) {
+    String group = String.format("%s/%s", groupPath, author(state));
+    return new AnsibleGalaxyAttributes(group, module(state), version(state));
+  }
+
+  public AnsibleGalaxyAttributes getCollectionAttributes(final TokenMatcher.State state) {
+    return getAttributesFromMatcherState(state, COLLECTION_PATH);
+  }
+
+  public AnsibleGalaxyAttributes getRoleAttributes(final TokenMatcher.State state) {
+    return getAttributesFromMatcherState(state, ROLE_PATH);
   }
 
   /**

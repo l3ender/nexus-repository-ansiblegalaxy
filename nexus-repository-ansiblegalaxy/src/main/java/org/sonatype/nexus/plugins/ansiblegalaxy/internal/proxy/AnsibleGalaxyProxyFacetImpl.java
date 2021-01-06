@@ -97,15 +97,20 @@ public class AnsibleGalaxyProxyFacetImpl
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case ROLE:
+      case COLLECTION_DETAIL:
+        return getAsset(ansiblegalaxyPathUtils.collectionDetailPath(matcherState));
       case COLLECTION_VERSION_LIST:
-        return getAsset(ansiblegalaxyPathUtils.modulePagedPath(matcherState));
+        return getAsset(ansiblegalaxyPathUtils.collectionVersionPagedPath(matcherState));
       case COLLECTION_VERSION:
-        return getAsset(ansiblegalaxyPathUtils.versionPath(matcherState));
+        return getAsset(ansiblegalaxyPathUtils.collectionVersionPath(matcherState));
+      case COLLECTION_ARTIFACT:
+        return getAsset(ansiblegalaxyPathUtils.collectionArtifactPath(matcherState));
+      case ROLE_DETAIL:
+        return getAsset(ansiblegalaxyPathUtils.roleDetailPagedPath(matcherState));
       case ROLE_VERSION_LIST:
         return getAsset(ansiblegalaxyPathUtils.roleMetadataPagedPath(matcherState));
-      case ARTIFACT:
-        return getAsset(ansiblegalaxyPathUtils.artifactPath(matcherState));
+      case ROLE_ARTIFACT:
+        return getAsset(ansiblegalaxyPathUtils.roleArtifactPath(matcherState));
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -132,17 +137,23 @@ public class AnsibleGalaxyProxyFacetImpl
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case ROLE:
+      case COLLECTION_DETAIL:
+        return putAsset(content, ansiblegalaxyPathUtils.collectionDetailPath(matcherState), assetKind);
       case COLLECTION_VERSION_LIST:
-        return putAsset(content, ansiblegalaxyPathUtils.modulePagedPath(matcherState), assetKind);
+        return putAsset(content, ansiblegalaxyPathUtils.collectionVersionPagedPath(matcherState), assetKind);
       case COLLECTION_VERSION:
-        return putComponent(ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState), content,
-            ansiblegalaxyPathUtils.versionPath(matcherState), assetKind);
+        return putComponent(ansiblegalaxyPathUtils.getCollectionAttributes(matcherState), content,
+            ansiblegalaxyPathUtils.collectionVersionPath(matcherState), assetKind);
+      case COLLECTION_ARTIFACT:
+        return putComponent(ansiblegalaxyPathUtils.getCollectionAttributes(matcherState), content,
+            ansiblegalaxyPathUtils.collectionArtifactPath(matcherState), assetKind);
+      case ROLE_DETAIL:
+        return putAsset(content, ansiblegalaxyPathUtils.roleDetailPagedPath(matcherState), assetKind);
       case ROLE_VERSION_LIST:
         return putAsset(content, ansiblegalaxyPathUtils.roleMetadataPagedPath(matcherState), assetKind);
-      case ARTIFACT:
-        return putComponent(ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState), content,
-            ansiblegalaxyPathUtils.artifactPath(matcherState), assetKind);
+      case ROLE_ARTIFACT:
+        return putComponent(ansiblegalaxyPathUtils.getRoleAttributes(matcherState), content,
+            ansiblegalaxyPathUtils.roleArtifactPath(matcherState), assetKind);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -178,7 +189,7 @@ public class AnsibleGalaxyProxyFacetImpl
   }
 
   private InputStream getUpdatedContent(AssetKind assetKind, InputStream in) throws IOException {
-    if (assetKind == AssetKind.ARTIFACT) {
+    if (assetKind == AssetKind.COLLECTION_ARTIFACT || assetKind == AssetKind.ROLE_ARTIFACT) {
       return in; // do not modify
     }
     else if (assetKind == AssetKind.ROLE_VERSION_LIST) {

@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.inject.Named;
 
+import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.blobstore.api.Blob;
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.common.hash.HashAlgorithm;
@@ -41,6 +42,7 @@ import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 
 import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
 
 import static java.util.Collections.singletonList;
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
@@ -55,6 +57,8 @@ import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_
 public class AnsibleGalaxyDataAccess
 {
   public static final List<HashAlgorithm> HASH_ALGORITHMS = ImmutableList.of(HashAlgorithm.SHA1);
+
+  private final Logger log = Loggers.getLogger(getClass());
 
   /**
    * Find an asset by its name.
@@ -123,6 +127,7 @@ public class AnsibleGalaxyDataAccess
       final String contentType,
       @Nullable final AttributesMap contentAttributes) throws IOException
   {
+    log.debug("saving asset: {}", asset.name());
     Content.applyToAsset(asset, Content.maintainLastModified(asset, contentAttributes));
     AssetBlob assetBlob = tx.setBlob(asset, asset.name(), contentSupplier, HASH_ALGORITHMS, null, contentType, false);
     tx.saveAsset(asset);
@@ -152,12 +157,14 @@ public class AnsibleGalaxyDataAccess
     StorageTx tx = UnitOfWork.currentTx();
     Bucket bucket = tx.findBucket(repository);
 
-    Component component = findComponent(tx, repository, ansibleGalaxyAttributes.getAuthor(),
-        ansibleGalaxyAttributes.getModule(), ansibleGalaxyAttributes.getVersion());
+    Component component = findComponent(tx, repository, ansibleGalaxyAttributes.getGroup(),
+        ansibleGalaxyAttributes.getName(), ansibleGalaxyAttributes.getVersion());
 
     if (component == null) {
-      component = tx.createComponent(bucket, repository.getFormat()).group(ansibleGalaxyAttributes.getAuthor())
-          .name(ansibleGalaxyAttributes.getModule()).version(ansibleGalaxyAttributes.getVersion());
+      log.debug("creating component: {}, {}, {}", ansibleGalaxyAttributes.getGroup(), ansibleGalaxyAttributes.getName(),
+          ansibleGalaxyAttributes.getVersion());
+      component = tx.createComponent(bucket, repository.getFormat()).group(ansibleGalaxyAttributes.getGroup())
+          .name(ansibleGalaxyAttributes.getName()).version(ansibleGalaxyAttributes.getVersion());
       tx.saveComponent(component);
     }
 
