@@ -36,9 +36,6 @@ public class JsonSearchReplacer
 
   @Override
   protected String getUpdatedContent(JsonNode field) {
-    if (field.isNull()) {
-      return null;
-    }
     return field.asText().replaceAll(search, replace);
   }
 

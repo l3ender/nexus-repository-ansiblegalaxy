@@ -33,9 +33,12 @@ public abstract class JsonReplacer
 
   private void updateFields(JsonNode item) {
     if (item.has(jsonFieldName)) {
-      log.trace("updating {}", jsonFieldName);
-      String updated = getUpdatedContent(item.get(jsonFieldName));
-      ((ObjectNode) item).put(jsonFieldName, updated);
+      JsonNode old = item.get(jsonFieldName);
+      if (!old.isNull()) {
+        String updated = getUpdatedContent(old);
+        log.trace("updating {} from {} -> {}", jsonFieldName, old, updated);
+        ((ObjectNode) item).put(jsonFieldName, updated);
+      }
     }
 
     // recurse

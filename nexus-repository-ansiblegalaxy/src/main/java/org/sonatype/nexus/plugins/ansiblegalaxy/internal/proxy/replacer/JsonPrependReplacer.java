@@ -33,9 +33,6 @@ public class JsonPrependReplacer
 
   @Override
   protected String getUpdatedContent(JsonNode field) {
-    if (field.isNull()) {
-      return null;
-    }
     return prepend + field.asText();
   }
 
