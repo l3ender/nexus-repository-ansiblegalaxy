@@ -133,7 +133,7 @@ extends RecipeSupport {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new TokenMatcher("/api"),
-        setAssetKind(AssetKind.API_INTERNALS)
+        setAssetKind(AssetKind.API_METADATA)
         )
   }
 

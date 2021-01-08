@@ -103,13 +103,10 @@ public class AnsibleGalaxyProxyFacetImpl
   protected Content getCachedContent(final Context context) {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
 
-    if (assetKind == AssetKind.API_INTERNALS) {
-      // TODO save api metadata
-      return null; // results not stored
-    }
-
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
+      case API_METADATA:
+        return getAsset(ansiblegalaxyPathUtils.apiMetadataPath(matcherState));
       case COLLECTION_DETAIL:
         return getAsset(ansiblegalaxyPathUtils.collectionDetailPath(matcherState));
       case COLLECTION_VERSION_LIST:
@@ -146,13 +143,10 @@ public class AnsibleGalaxyProxyFacetImpl
   protected Content store(final Context context, final Content content) throws IOException {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
 
-    if (assetKind == AssetKind.API_INTERNALS) {
-      // TODO save api metadata
-      return content; // results not stored
-    }
-
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
+      case API_METADATA:
+        return putAsset(context, content, ansiblegalaxyPathUtils.apiMetadataPath(matcherState), assetKind);
       case COLLECTION_DETAIL:
         return putAsset(context, content, ansiblegalaxyPathUtils.collectionDetailPath(matcherState), assetKind);
       case COLLECTION_VERSION_LIST:

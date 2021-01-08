@@ -24,7 +24,7 @@ import static org.sonatype.nexus.repository.cache.CacheControllerHolder.METADATA
  */
 public enum AssetKind
 {
-  API_INTERNALS(METADATA),
+  API_METADATA(METADATA),
   COLLECTION_DETAIL(METADATA),
   COLLECTION_VERSION_LIST(METADATA),
   COLLECTION_VERSION_DETAIL(METADATA),

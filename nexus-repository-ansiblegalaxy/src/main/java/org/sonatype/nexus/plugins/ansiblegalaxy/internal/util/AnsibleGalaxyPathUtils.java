@@ -40,6 +40,8 @@ public class AnsibleGalaxyPathUtils
 
   private static final String METADATA_PATH = "metadata";
 
+  private static final String API_PATH = "api";
+
   private static final String COLLECTION_PATH = "collection";
 
   private static final String ROLE_PATH = "role";
@@ -93,6 +95,10 @@ public class AnsibleGalaxyPathUtils
     String result = state.getTokens().get(name);
     checkNotNull(result);
     return result;
+  }
+
+  public String apiMetadataPath(final State matcherState) {
+    return String.format("%s/%s/detail.json", METADATA_PATH, API_PATH);
   }
 
   public String collectionDetailPath(final State matcherState) {
