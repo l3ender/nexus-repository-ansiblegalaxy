@@ -153,11 +153,11 @@ extends RecipeSupport {
         )
   }
 
-  static Matcher collectionVersionMatcher() {
+  static Matcher collectionVersionDetailMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/{version}/"),
-        setAssetKind(AssetKind.COLLECTION_VERSION)
+        setAssetKind(AssetKind.COLLECTION_VERSION_DETAIL)
         )
   }
 

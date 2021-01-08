@@ -99,44 +99,44 @@ public class AnsibleGalaxyPathUtils
     String author = author(matcherState);
     String module = module(matcherState);
 
-    return String.format("%s/%s/%s/info.json", COLLECTION_PATH, author, module);
+    return String.format("%s/%s/%s/detail.json", COLLECTION_PATH, author, module);
   }
 
-  private String modulePagedPath(final State matcherState) {
+  public String collectionVersionPagedPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
     String page = page(matcherState);
 
-    return String.format("%s/%s/info%s.json", author, module, page);
-  }
-
-  public String collectionVersionPagedPath(final State matcherState) {
-    return String.format("%s/%s", COLLECTION_PATH, modulePagedPath(matcherState));
+    return String.format("%s/%s/%s/versions%s.json", COLLECTION_PATH, author, module, page);
   }
 
   public String roleSearchPath(final State matcherState) {
-    return String.format("%s/%s", ROLE_PATH, modulePagedPath(matcherState));
+    String author = author(matcherState);
+    String module = module(matcherState);
+    String page = page(matcherState);
+
+    return String.format("%s/%s/%s/roles%s.json", ROLE_PATH, author, module, page);
   }
 
   public String roleDetailPath(final State matcherState) {
     String id = id(matcherState);
 
-    return String.format("%s/%s/%s/info.json", METADATA_PATH, ROLE_PATH, id);
+    return String.format("%s/%s/%s/detail.json", METADATA_PATH, ROLE_PATH, id);
   }
 
-  public String roleMetadataPagedPath(final State matcherState) {
+  public String roleVersionPagedPath(final State matcherState) {
     String id = id(matcherState);
     String page = page(matcherState);
 
-    return String.format("%s/%s/%s/info%s.json", METADATA_PATH, ROLE_PATH, id, page);
+    return String.format("%s/%s/%s/versions%s.json", METADATA_PATH, ROLE_PATH, id, page);
   }
 
-  public String collectionVersionPath(final State matcherState) {
+  public String collectionVersionDetailPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
     String version = version(matcherState);
 
-    return String.format("%s/%s/%s/%s/info.json", COLLECTION_PATH, author, module, version);
+    return String.format("%s/%s/%s/%s/detail.json", COLLECTION_PATH, author, module, version);
   }
 
   private String artifactPath(final State matcherState) {

@@ -57,21 +57,21 @@ public class AnsibleGalaxyPathUtilsTest
   public void collectionDetailPath() {
     String result = underTest.collectionDetailPath(state);
 
-    assertThat(result, is(equalTo("collection/azure/azcollection/info.json")));
+    assertThat(result, is(equalTo("collection/azure/azcollection/detail.json")));
   }
 
   @Test
   public void collectionVersionListPath() {
     String result = underTest.collectionVersionPagedPath(state);
 
-    assertThat(result, is(equalTo("collection/azure/azcollection/info1.json")));
+    assertThat(result, is(equalTo("collection/azure/azcollection/versions1.json")));
   }
 
   @Test
   public void roleSearchPath() {
     String result = underTest.roleSearchPath(state);
 
-    assertThat(result, is(equalTo("role/azure/azcollection/info1.json")));
+    assertThat(result, is(equalTo("role/azure/azcollection/roles1.json")));
   }
 
   @Test
@@ -81,7 +81,7 @@ public class AnsibleGalaxyPathUtilsTest
     when(state.getTokens()).thenReturn(tokens);
     String result = underTest.roleDetailPath(state);
 
-    assertThat(result, is(equalTo("metadata/role/444/info.json")));
+    assertThat(result, is(equalTo("metadata/role/444/detail.json")));
   }
 
   @Test
@@ -91,24 +91,24 @@ public class AnsibleGalaxyPathUtilsTest
     when(state.getTokens()).thenReturn(tokens);
     String result = underTest.collectionVersionPagedPath(state);
 
-    assertThat(result, is(equalTo("collection/azure/azcollection/info3.json")));
+    assertThat(result, is(equalTo("collection/azure/azcollection/versions3.json")));
   }
 
   @Test
   public void roleSearchPathPaged() {
     Map<String, String> tokens = defaultTokens();
-    tokens.put("pagenum", "3");
+    tokens.put("pagenum", "2");
     when(state.getTokens()).thenReturn(tokens);
     String result = underTest.roleSearchPath(state);
 
-    assertThat(result, is(equalTo("role/azure/azcollection/info3.json")));
+    assertThat(result, is(equalTo("role/azure/azcollection/roles2.json")));
   }
 
   @Test
   public void collectionVersionPath() {
-    String result = underTest.collectionVersionPath(state);
+    String result = underTest.collectionVersionDetailPath(state);
 
-    assertThat(result, is(equalTo("collection/azure/azcollection/1.2.0/info.json")));
+    assertThat(result, is(equalTo("collection/azure/azcollection/1.2.0/detail.json")));
   }
 
   @Test
@@ -117,9 +117,9 @@ public class AnsibleGalaxyPathUtilsTest
     tokens.put("id", "555");
     tokens.put("pagenum", "3");
     when(state.getTokens()).thenReturn(tokens);
-    String result = underTest.roleMetadataPagedPath(state);
+    String result = underTest.roleVersionPagedPath(state);
 
-    assertThat(result, is(equalTo("metadata/role/555/info3.json")));
+    assertThat(result, is(equalTo("metadata/role/555/versions3.json")));
   }
 
   @Test

@@ -114,8 +114,8 @@ public class AnsibleGalaxyProxyFacetImpl
         return getAsset(ansiblegalaxyPathUtils.collectionDetailPath(matcherState));
       case COLLECTION_VERSION_LIST:
         return getAsset(ansiblegalaxyPathUtils.collectionVersionPagedPath(matcherState));
-      case COLLECTION_VERSION:
-        return getAsset(ansiblegalaxyPathUtils.collectionVersionPath(matcherState));
+      case COLLECTION_VERSION_DETAIL:
+        return getAsset(ansiblegalaxyPathUtils.collectionVersionDetailPath(matcherState));
       case COLLECTION_ARTIFACT:
         return getAsset(ansiblegalaxyPathUtils.collectionArtifactPath(matcherState));
       case ROLE_SEARCH:
@@ -123,7 +123,7 @@ public class AnsibleGalaxyProxyFacetImpl
       case ROLE_DETAIL:
         return getAsset(ansiblegalaxyPathUtils.roleDetailPath(matcherState));
       case ROLE_VERSION_LIST:
-        return getAsset(ansiblegalaxyPathUtils.roleMetadataPagedPath(matcherState));
+        return getAsset(ansiblegalaxyPathUtils.roleVersionPagedPath(matcherState));
       case ROLE_ARTIFACT:
         return getAsset(ansiblegalaxyPathUtils.roleArtifactPath(matcherState));
       default:
@@ -157,9 +157,9 @@ public class AnsibleGalaxyProxyFacetImpl
         return putAsset(context, content, ansiblegalaxyPathUtils.collectionDetailPath(matcherState), assetKind);
       case COLLECTION_VERSION_LIST:
         return putAsset(context, content, ansiblegalaxyPathUtils.collectionVersionPagedPath(matcherState), assetKind);
-      case COLLECTION_VERSION:
+      case COLLECTION_VERSION_DETAIL:
         return putComponent(context, ansiblegalaxyPathUtils.getCollectionAttributes(matcherState), content,
-            ansiblegalaxyPathUtils.collectionVersionPath(matcherState), assetKind);
+            ansiblegalaxyPathUtils.collectionVersionDetailPath(matcherState), assetKind);
       case COLLECTION_ARTIFACT:
         return putComponent(context, ansiblegalaxyPathUtils.getCollectionAttributes(matcherState), content,
             ansiblegalaxyPathUtils.collectionArtifactPath(matcherState), assetKind);
@@ -168,7 +168,7 @@ public class AnsibleGalaxyProxyFacetImpl
       case ROLE_DETAIL:
         return putAsset(context, content, ansiblegalaxyPathUtils.roleDetailPath(matcherState), assetKind);
       case ROLE_VERSION_LIST:
-        return putAsset(context, content, ansiblegalaxyPathUtils.roleMetadataPagedPath(matcherState), assetKind);
+        return putAsset(context, content, ansiblegalaxyPathUtils.roleVersionPagedPath(matcherState), assetKind);
       case ROLE_ARTIFACT:
         return putComponent(context, ansiblegalaxyPathUtils.getRoleAttributes(matcherState), content,
             ansiblegalaxyPathUtils.roleArtifactPath(matcherState), assetKind);
