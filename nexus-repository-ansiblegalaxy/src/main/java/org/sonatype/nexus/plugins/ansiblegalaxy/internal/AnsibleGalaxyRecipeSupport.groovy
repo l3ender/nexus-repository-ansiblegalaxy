@@ -18,6 +18,7 @@ package org.sonatype.nexus.plugins.ansiblegalaxy.internal
 import javax.inject.Inject
 import javax.inject.Provider
 
+import org.sonatype.goodies.common.Loggers
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.security.AnsibleGalaxySecurityFacet
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.QueryTokenMatcher
@@ -49,7 +50,11 @@ import org.sonatype.nexus.repository.view.matchers.ActionMatcher
 import org.sonatype.nexus.repository.view.matchers.logic.LogicMatchers
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
 
+import org.slf4j.Logger
+
+import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_ARTIFACT_MODULE_PARAM_NAME
 import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_ARTIFACT_URI_PREFIX
+import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_VERSION_URI_SUFFIX
 import static org.sonatype.nexus.repository.http.HttpMethods.GET
 import static org.sonatype.nexus.repository.http.HttpMethods.HEAD
 
@@ -58,6 +63,8 @@ import static org.sonatype.nexus.repository.http.HttpMethods.HEAD
  */
 abstract class AnsibleGalaxyRecipeSupport
 extends RecipeSupport {
+  private static final Logger LOG = Loggers.getLogger(AnsibleGalaxyRecipeSupport.class)
+
   @Inject
   Provider<AnsibleGalaxySecurityFacet> securityFacet
 
@@ -126,13 +133,7 @@ extends RecipeSupport {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new TokenMatcher("/api"),
-        new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.API_INTERNALS)
-            return true
-          }
-        }
+        setAssetKind(AssetKind.API_INTERNALS)
         )
   }
 
@@ -140,13 +141,7 @@ extends RecipeSupport {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/"),
-        new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_DETAIL)
-            return true
-          }
-        }
+        setAssetKind(AssetKind.COLLECTION_DETAIL)
         )
   }
 
@@ -154,13 +149,7 @@ extends RecipeSupport {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/", [page: "pagenum"]),
-        new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_VERSION_LIST)
-            return true
-          }
-        }
+        setAssetKind(AssetKind.COLLECTION_VERSION_LIST)
         )
   }
 
@@ -168,13 +157,7 @@ extends RecipeSupport {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/{version}/"),
-        new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_VERSION)
-            return true
-          }
-        }
+        setAssetKind(AssetKind.COLLECTION_VERSION)
         )
   }
 
@@ -182,55 +165,50 @@ extends RecipeSupport {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
         new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
-        new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.COLLECTION_ARTIFACT)
-            return true
-          }
-        }
+        setAssetKind(AssetKind.COLLECTION_ARTIFACT)
+        )
+  }
+
+  static Matcher roleSearchMatcher() {
+    LogicMatchers.and(
+        new ActionMatcher(GET, HEAD),
+        new QueryTokenMatcher("/api/{apiversion}/roles/", [owner__username: "author", name: "module"]),
+        setAssetKind(AssetKind.ROLE_SEARCH)
         )
   }
 
   static Matcher roleDetailMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
-        new QueryTokenMatcher("/api/{apiversion}/roles/", [owner__username: "author", name: "module"]),
-        new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.ROLE_DETAIL)
-            return true
-          }
-        }
+        new TokenMatcher("/api/{apiversion}/roles/{id}/"),
+        setAssetKind(AssetKind.ROLE_DETAIL)
         )
   }
 
   static Matcher roleVersionListMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
-        new QueryTokenMatcher("/api/{apiversion}/roles/{id}/versions/", [page: "pagenum"]),
-        new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.ROLE_VERSION_LIST)
-            return true
-          }
-        }
+        new QueryTokenMatcher("/api/{apiversion}/roles/{id}/${ROLE_VERSION_URI_SUFFIX}", [page: "pagenum"]),
+        setAssetKind(AssetKind.ROLE_VERSION_LIST)
         )
   }
 
   static Matcher roleArtifactMatcher() {
     LogicMatchers.and(
         new ActionMatcher(GET, HEAD),
-        new TokenMatcher(ROLE_ARTIFACT_URI_PREFIX + "/{author}/{module}/archive/{version}.tar.gz"),
-        new Matcher() {
+        new QueryTokenMatcher(ROLE_ARTIFACT_URI_PREFIX + "/{author}/{reponame}/archive/{version}.tar.gz", [(ROLE_ARTIFACT_MODULE_PARAM_NAME): "module"]),
+        setAssetKind(AssetKind.ROLE_ARTIFACT)
+        )
+  }
+
+  private static Matcher setAssetKind(AssetKind assetKind) {
+    return new Matcher() {
           @Override
           boolean matches(final Context context) {
-            context.attributes.set(AssetKind.class, AssetKind.ROLE_ARTIFACT)
-            return true
+            LOG.debug("{} matches {}", assetKind, context.getRequest())
+            context.attributes.set(AssetKind.class, assetKind)
+            return true;
           }
         }
-        )
   }
 }

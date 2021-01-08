@@ -68,10 +68,20 @@ public class AnsibleGalaxyPathUtilsTest
   }
 
   @Test
-  public void roleVersionListPath() {
-    String result = underTest.roleDetailPagedPath(state);
+  public void roleSearchPath() {
+    String result = underTest.roleSearchPath(state);
 
     assertThat(result, is(equalTo("role/azure/azcollection/info1.json")));
+  }
+
+  @Test
+  public void roleDetailPath() {
+    Map<String, String> tokens = new HashMap<>();
+    tokens.put("id", "444");
+    when(state.getTokens()).thenReturn(tokens);
+    String result = underTest.roleDetailPath(state);
+
+    assertThat(result, is(equalTo("metadata/role/444/info.json")));
   }
 
   @Test
@@ -85,11 +95,11 @@ public class AnsibleGalaxyPathUtilsTest
   }
 
   @Test
-  public void roleVersionListPathPaged() {
+  public void roleSearchPathPaged() {
     Map<String, String> tokens = defaultTokens();
     tokens.put("pagenum", "3");
     when(state.getTokens()).thenReturn(tokens);
-    String result = underTest.roleDetailPagedPath(state);
+    String result = underTest.roleSearchPath(state);
 
     assertThat(result, is(equalTo("role/azure/azcollection/info3.json")));
   }

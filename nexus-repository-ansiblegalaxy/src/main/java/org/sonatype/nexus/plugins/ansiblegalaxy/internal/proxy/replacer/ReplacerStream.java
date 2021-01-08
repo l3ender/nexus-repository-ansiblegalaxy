@@ -2,15 +2,13 @@ package org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.sonatype.goodies.common.Loggers;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.StreamUtils;
 
-import com.google.common.base.Strings;
-import com.google.common.io.CharSource;
-import com.google.common.io.CharStreams;
-import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -23,41 +21,38 @@ public class ReplacerStream
 
   private final Logger log = Loggers.getLogger(getClass());
 
-  private final Replacer[] replacers;
+  private final List<Replacer> replacers;
 
-  public ReplacerStream(Replacer... replacers) {
+  public ReplacerStream(Replacer replacer) {
+    this.replacers = new ArrayList<>();
+    this.replacers.add(replacer);
+  }
+
+  public ReplacerStream(List<Replacer> replacers) {
     this.replacers = checkNotNull(replacers);
   }
 
   public InputStream getReplacedContent(InputStream input) throws IOException {
-    String content = toString(input);
+    if (CollectionUtils.isNotEmpty(replacers)) {
+      String content = StreamUtils.toString(input);
 
-    String updatedContent = content;
+      String updatedContent = content;
 
-    for (Replacer replacer : replacers) {
-      log.debug("replacing content using {}: {}", replacer.getClass().getSimpleName(), replacer);
+      for (Replacer replacer : replacers) {
+        log.debug("replacing content using {}: {}", replacer.getClass().getSimpleName(), replacer);
 
-      updatedContent = replacer.getReplacedContent(content);
-      log.trace("content replace:\n\t---> old: {}\n\t---> new: {}", content, updatedContent);
+        updatedContent = replacer.getReplacedContent(content);
+        if (log.isTraceEnabled()) {
+          log.trace("content replace:\n\t---> old: {}\n\t---> new: {}", content, updatedContent);
+        }
 
-      content = updatedContent;
+        content = updatedContent;
+      }
+
+      return StreamUtils.toStream(updatedContent);
     }
 
-    return toStream(updatedContent);
-  }
-
-  /**
-   * Converts an input stream to string, using UTF8.
-   */
-  private String toString(InputStream in) throws IOException {
-    return Strings.nullToEmpty(CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8))).trim();
-  }
-
-  /**
-   * Converts a string to an input stream, using UTF8.
-   */
-  private InputStream toStream(String str) throws IOException {
-    return new ReaderInputStream(CharSource.wrap(str).openStream(), StandardCharsets.UTF_8);
+    return input;
   }
 
 }

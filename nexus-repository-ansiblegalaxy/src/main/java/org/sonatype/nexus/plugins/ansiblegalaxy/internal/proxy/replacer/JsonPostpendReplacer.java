@@ -13,31 +13,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <pre>
  * String json; // {"foo": "abc"}
  * 
- * String updated = new JsonPrependReplacer("foo", "123").getReplacedContent(json);
- * // output: {"foo": "123abc"}
+ * String updated = new JsonPostpendReplacer("foo", "123").getReplacedContent(json);
+ * // output: {"foo": "abc123"}
  * </pre>
  * 
  * All values in JSON (regardless of location in object) will be updated.
  */
-public class JsonPrependReplacer
+public class JsonPostpendReplacer
     extends JsonReplacer
 {
 
-  private final String prepend;
+  private final String postpend;
 
-  public JsonPrependReplacer(String jsonFieldName, String prepend) {
+  public JsonPostpendReplacer(String jsonFieldName, String postpend) {
     super(jsonFieldName);
-    this.prepend = checkNotNull(prepend);
+    this.postpend = checkNotNull(postpend);
   }
 
   @Override
   protected String getUpdatedContent(JsonNode field) {
-    return prepend + field.asText();
+    return field.asText() + postpend;
   }
 
   @Override
   public String toString() {
-    return "prepend=" + prepend + ", " + super.toString();
+    return "postpend=" + postpend + ", " + super.toString();
   }
 
 }

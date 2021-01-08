@@ -39,9 +39,7 @@ public class JsonReplacerTest
   public void testInvalidJson() throws IOException {
     String input = "abc 123";
 
-    String result = new JsonSearchReplacer("prop", SEARCH, REPLACE).getReplacedContent(input);
-
-    assertThat(result, is(equalTo(input)));
+    new JsonSearchReplacer("prop", SEARCH, REPLACE).getReplacedContent(input);
   }
 
   @Test

@@ -79,6 +79,7 @@ extends AnsibleGalaxyRecipeSupport {
       collectionVersionListMatcher(),
       collectionVersionMatcher(),
       collectionArtifactMatcher(),
+      roleSearchMatcher(),
       roleDetailMatcher(),
       roleVersionListMatcher(),
       roleArtifactMatcher()

@@ -44,6 +44,10 @@ public class AnsibleGalaxyPathUtils
 
   private static final String ROLE_PATH = "role";
 
+  public static final String ROLE_VERSION_URI_SUFFIX = "versions/";
+
+  public static final String ROLE_ARTIFACT_MODULE_PARAM_NAME = "module";
+
   public static final String ROLE_ARTIFACT_URI_PREFIX = "/download/role";
 
   private final Logger log = Loggers.getLogger(getClass());
@@ -63,6 +67,10 @@ public class AnsibleGalaxyPathUtils
     return match(state, "version");
   }
 
+  public String version(final Context context) {
+    return version(matcherState(context));
+  }
+
   public String id(final TokenMatcher.State state) {
     return match(state, "id");
   }
@@ -73,7 +81,7 @@ public class AnsibleGalaxyPathUtils
 
   public TokenMatcher.State matcherState(final Context context) {
     State state = context.getAttributes().require(TokenMatcher.State.class);
-    log.info("matched state tokens: {}", state.getTokens());
+    log.debug("matched state tokens: {}", state.getTokens());
     return state;
   }
 
@@ -106,8 +114,14 @@ public class AnsibleGalaxyPathUtils
     return String.format("%s/%s", COLLECTION_PATH, modulePagedPath(matcherState));
   }
 
-  public String roleDetailPagedPath(final State matcherState) {
+  public String roleSearchPath(final State matcherState) {
     return String.format("%s/%s", ROLE_PATH, modulePagedPath(matcherState));
+  }
+
+  public String roleDetailPath(final State matcherState) {
+    String id = id(matcherState);
+
+    return String.format("%s/%s/%s/info.json", METADATA_PATH, ROLE_PATH, id);
   }
 
   public String roleMetadataPagedPath(final State matcherState) {

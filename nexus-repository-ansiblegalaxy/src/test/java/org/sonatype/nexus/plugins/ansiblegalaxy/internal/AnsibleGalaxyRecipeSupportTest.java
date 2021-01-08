@@ -18,9 +18,11 @@ import org.sonatype.goodies.testsupport.TestSupport;
 import org.sonatype.nexus.common.collect.AttributesMap;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.Matcher;
+import org.sonatype.nexus.repository.view.Parameters;
 import org.sonatype.nexus.repository.view.Request;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 
+import com.google.common.collect.ImmutableListMultimap;
 import org.apache.commons.collections.MapUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,6 +93,7 @@ public class AnsibleGalaxyRecipeSupportTest
   @Test
   public void testRoleArtifact() {
     when(request.getPath()).thenReturn("/download/role/geerlingguy/ansible-role-jenkins/archive/2.6.0.tar.gz");
+    when(request.getParameters()).thenReturn(new Parameters(ImmutableListMultimap.of("module", "jenkins")));
     Matcher matcher = roleArtifactMatcher();
     boolean matches = matcher.matches(context);
     assertTrue(matches);
@@ -100,7 +103,7 @@ public class AnsibleGalaxyRecipeSupportTest
     Map<String, String> tokens = state.getTokens();
     assertTrue(MapUtils.isNotEmpty(tokens));
     assertThat(tokens.get("author"), is(equalTo("geerlingguy")));
-    assertThat(tokens.get("module"), is(equalTo("ansible-role-jenkins")));
+    assertThat(tokens.get("module"), is(equalTo("jenkins")));
     assertThat(tokens.get("version"), is(equalTo("2.6.0")));
   }
 

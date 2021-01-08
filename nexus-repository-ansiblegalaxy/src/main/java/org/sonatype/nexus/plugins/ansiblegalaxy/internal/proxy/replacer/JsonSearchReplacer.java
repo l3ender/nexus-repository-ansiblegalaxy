@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Given an input stream will load it as a JSON object and find the property at the given path (JSON expression path).
- * The property value will then replace all "search" string occurrences with "replace" string value for the provided
- * input stream.
+ * Given an input, will load the content as a JSON object and find the property with the given name.
+ * The given value will then replace all "search" string occurrences with "replace" string value for property's value.
  * 
  * Example:
  * 
@@ -18,7 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * // output: {"foo": "123 xyz"}
  * </pre>
  * 
- * All values in JSON (regardless of where field nested level) will be updated.
+ * All values in JSON (regardless of location in object) will be updated.
  */
 public class JsonSearchReplacer
     extends JsonReplacer
