@@ -112,9 +112,11 @@ All released versions can be found on [the releases page](https://github.com/l3e
 | Plugin Version               | Nexus Repository Version |
 |------------------------------|--------------------------|
 | `ansible-galaxy collection install`         | :heavy_check_mark:       |
-| `ansible-galaxy role install`         | :heavy_check_mark:       |
+| `ansible-galaxy role install`         | :heavy_check_mark: <sup>*</sup>     |
 
 Be sure to [configure the `ansible-galaxy` client](docs/ansiblegalaxy_user_documentation.md#configuring-the-ansible-galaxy-client).
+
+<sup>*</sup> See [role installation support](docs/ansiblegalaxy_user_documentation.md#role-installation-support).
 
 
 ## Installing the plugin

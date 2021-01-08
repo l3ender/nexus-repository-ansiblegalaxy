@@ -56,3 +56,9 @@ ansible-galaxy collection install azure.azcollection -s http://localhost:8081/re
 ```
 
 The command above tells ansible-galaxy to fetch (and install) packages from your NXRM Ansible Galaxy proxy. The NXRM Ansible Galaxy proxy will download any missing packages from the remote Ansible Galaxy repository, and cache the packages on the NXRM Ansible Galaxy proxy. The next time any client requests the same package from your NXRM Ansible Galaxy proxy, the already cached package will be returned to the client.
+
+### Role installation support
+
+A bug exists in the `ansible-galaxy` client where role artifacts are downloaded directly from github.com instead of honoring the Galaxy API's result indicating `download_url`. [A fix](https://github.com/ansible/ansible/pull/73114) has been opened in the Ansible repo and is pending merge/release into a future version of the product.
+
+In the meantime, you can branch the above repo with the fix to resolve downloads through Nexus, or adjust your infrastructure accordingly to account for the issue.
