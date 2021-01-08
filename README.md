@@ -53,19 +53,24 @@ You may also find it helpful to configure your IDE to use the [Sonatype Code sty
 
 ### Building
 
-To build the project and generate the bundle use Maven
+To build the project and generate the bundle use Maven:
+```bash
+mvn clean package -PbuildKar
+```
 
-    mvn clean package -PbuildKar
-
-If everything checks out, the bundle for ansiblegalaxy should be available in the `target` folder
+If everything checks out, the bundle for ansiblegalaxy should be available in the `target` folder.
 
 #### Build with Docker
 
-    docker build -t nexus-repository-ansiblegalaxy .
+```bash
+docker build -t nexus-repository-ansiblegalaxy .
+```
 
 #### Run as a Docker container
 
-    docker run -d -p 8081:8081 --name nexus-repository-ansiblegalaxy nexus-repository-ansiblegalaxy 
+```bash
+docker run -d -p 8081:8081 --name nexus-repository-ansiblegalaxy nexus-repository-ansiblegalaxy 
+```
 
 For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
 
@@ -73,7 +78,9 @@ After allowing some time to spin up, the application will be available from your
 
 To read the generated admin password for your first login to the web UI, you can use the command below against the running docker container:
 
-    docker exec -it nexus-repository-ansiblegalaxy cat /nexus-data/admin.password && echo
+```bash
+docker exec -it nexus-repository-ansiblegalaxy cat /nexus-data/admin.password && echo
+```
 
 For simplicity, you should check `Enable anonymous access` in the prompts following your first login.   
 
@@ -83,7 +90,7 @@ For simplicity, you should check `Enable anonymous access` in the prompts follow
 
 ## Compatibility with Nexus Repository Manager 3 Versions
 
-The table below outlines what version of Nexus Repository the plugin was built against
+The table below outlines what version of Nexus Repository the plugin was built against.
 
 | Plugin Version | Nexus Repository Version |
 |----------------|--------------------------|
@@ -117,7 +124,6 @@ All released versions can be found on [the releases page](https://github.com/l3e
 Be sure to [configure the `ansible-galaxy` client](docs/ansiblegalaxy_user_documentation.md#configuring-the-ansible-galaxy-client).
 
 <sup>*</sup> See [role installation support](docs/ansiblegalaxy_user_documentation.md#role-installation-support).
-
 
 ## Installing the plugin
 
@@ -189,7 +195,7 @@ If you are trying to use the ansiblegalaxy plugin permanently, it likely makes m
     </features>
    ```
    as the last feature.
-   
+
 This will cause the plugin to be loaded and started with each startup of Nexus Repository.
 
 ## The Fine Print
@@ -220,43 +226,46 @@ Looking to contribute to our code but need some help? There's a few ways to get 
 
 ## Integration Tests
 
-There a still some rough edges around writing integration tests, which are noted below.
-Please report any problems you find. 
+There a still some rough edges around writing integration tests, which are noted below. Please report any problems you find.
 
-The project has a “format” module, and an “IT” module. 
-   This allows the “format” module to be bundled up and used by the IT framework classes in the “it” module.
-   In this project, the sub module: [nexus-repository-ansiblegalaxy](nexus-repository-ansiblegalaxy) is the "format" module.
-   The sub module: [nexus-repository-ansiblegalaxy-it](nexus-repository-ansiblegalaxy-it) is the "it" module.
-      
+The project has a “format” module, and an “IT” module. This allows the “format” module to be bundled up and used by the IT framework classes in the “it” module.
+
+In this project, the sub module [nexus-repository-ansiblegalaxy](nexus-repository-ansiblegalaxy) is the "format" module, while the sub module[nexus-repository-ansiblegalaxy-it](nexus-repository-ansiblegalaxy-it) is the "it" module.
+
 #### Debugging ITs
 
-  You can connect a remote debugger to port 5005 to debug Integration Tests. Just add the `-Dit.debug=true` argument 
-  when running ITs. For example:
-  
-    mvn clean verify -Dit.debug=true
+You can connect a remote debugger to port 5005 to debug Integration Tests. Just add the `-Dit.debug=true` argument when running ITs. For example:
 
-  After the IT starts (you would see the following in a terminal:
-  
-      ...
-      [INFO] --- maven-failsafe-plugin:2.18.1:integration-test (default) @ nexus-repository-...-it ---
-      ...
-      -------------------------------------------------------
-       T E S T S
-      -------------------------------------------------------
-      Running org.sonatype.nexus.plugins...
+```bash
+mvn clean verify -Dit.debug=true
+```
 
-   ), you can attach a remote debugger to port 5005. Keep trying to attach the remote debugger until
-   the connection succeeds.
+After the IT starts you would see the following in a terminal:
 
-   After each IT runs, you have to reconnect the remote debugger.
-   
-   You can run a single IT by adding the `-Dit.test=MyIntegrationTestToRunIT` property. The example below also skips
-    running the unit tests.
-    
-      mvn clean verify -Dit.debug=true -Dtest=skip -Dit.test=MyIntegrationTestToRunIT
-      
-  When running ITs, the Nexus Repository Manager will write log output to the following file:
-  
-      nexus-repository-ansiblegalaxy/nexus-repository-ansiblegalaxy-it/target/it-data/1/nexus3/log/nexus.log
-      
-   With multiple ITs, the `1` in the path above will be incremented for each IT.
+```bash
+...
+[INFO] --- maven-failsafe-plugin:2.18.1:integration-test (default) @ nexus-repository-...-it ---
+...
+-------------------------------------------------------
+  T E S T S
+-------------------------------------------------------
+Running org.sonatype.nexus.plugins...
+```
+
+You can then attach a remote debugger to port 5005. Keep trying to attach the remote debugger until the connection succeeds.
+
+After each IT runs, you have to reconnect the remote debugger.
+
+You can run a single IT by adding the `-Dit.test=MyIntegrationTestToRunIT` property. The example below also skips running the unit tests.
+
+```bash
+mvn clean verify -Dit.debug=true -Dtest=skip -Dit.test=MyIntegrationTestToRunIT
+```
+
+When running ITs, the Nexus Repository Manager will write log output to the following file:
+
+```bash
+nexus-repository-ansiblegalaxy/nexus-repository-ansiblegalaxy-it/target/it-data/1/nexus3/log/nexus.log
+```
+
+With multiple ITs, the `1` in the path above will be incremented for each IT.
