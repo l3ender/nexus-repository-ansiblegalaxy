@@ -88,6 +88,7 @@ The table below outlines what version of Nexus Repository the plugin was built a
 | Plugin Version | Nexus Repository Version |
 |----------------|--------------------------|
 | v0.1.0         | 3.29.1-01                |
+| v0.2.0         | 3.29.1-01                |
 
 If a new version of Nexus Repository is released and the plugin needs changes, a new release will be made, and this
 table will be updated to indicate which version of Nexus Repository it will function against. This is done on a time 
@@ -111,8 +112,11 @@ All released versions can be found on [the releases page](https://github.com/l3e
 | Plugin Version               | Nexus Repository Version |
 |------------------------------|--------------------------|
 | `ansible-galaxy collection install`         | :heavy_check_mark:       |
+| `ansible-galaxy role install`         | :heavy_check_mark: <sup>*</sup>     |
 
 Be sure to [configure the `ansible-galaxy` client](docs/ansiblegalaxy_user_documentation.md#configuring-the-ansible-galaxy-client).
+
+<sup>*</sup> See [role installation support](docs/ansiblegalaxy_user_documentation.md#role-installation-support).
 
 
 ## Installing the plugin
@@ -145,7 +149,7 @@ good installation path if you are just testing or doing development on the plugi
   # sudo su - nexus
   $ cd <nexus_dir>/bin
   $ ./nexus run
-  > bundle:install file:///tmp/nexus-repository-ansiblegalaxy-0.1.0.jar
+  > bundle:install file:///tmp/nexus-repository-ansiblegalaxy-*.jar
   > bundle:list
   ```
   (look for org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy ID, should be the last one)
@@ -157,7 +161,7 @@ good installation path if you are just testing or doing development on the plugi
 
 For more permanent installs of the nexus-repository-ansiblegalaxy plugin, follow these instructions:
 
-* Copy the bundle (nexus-repository-ansiblegalaxy-0.1.0.jar) into <nexus_dir>/deploy
+* Copy the bundle (nexus-repository-ansiblegalaxy-*.jar) into <nexus_dir>/deploy
 
 This will cause the plugin to be loaded with each restart of Nexus Repository. As well, this folder is monitored
 by Nexus Repository and the plugin should load within 60 seconds of being copied there if Nexus Repository
@@ -167,7 +171,7 @@ is running. You will still need to start the bundle using the karaf commands men
 
 If you are trying to use the ansiblegalaxy plugin permanently, it likely makes more sense to do the following:
 
-* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-ansiblegalaxy/0.1.0/nexus-repository-ansiblegalaxy-0.1.0.jar`
+* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-ansiblegalaxy/0.2.0/nexus-repository-ansiblegalaxy-0.2.0.jar`
 * Make the following additions marked with + to `<nexus_dir>/system/org/sonatype/nexus/assemblies/nexus-core-feature/3.x.y/nexus-core-feature-3.x.y-features.xml`
 
    ```
@@ -178,9 +182,9 @@ If you are trying to use the ansiblegalaxy plugin permanently, it likely makes m
    
    And
    ```
-   + <feature name="nexus-repository-ansiblegalaxy" description="org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy" version="0.1.0">
+   + <feature name="nexus-repository-ansiblegalaxy" description="org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy" version="0.2.0">
    +     <details>org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy</details>
-   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-ansiblegalaxy/0.1.0</bundle>
+   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-ansiblegalaxy/0.2.0</bundle>
    + </feature>
     </features>
    ```

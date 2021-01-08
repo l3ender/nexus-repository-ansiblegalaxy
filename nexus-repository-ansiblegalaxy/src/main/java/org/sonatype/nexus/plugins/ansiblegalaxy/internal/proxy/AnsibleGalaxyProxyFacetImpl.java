@@ -14,8 +14,10 @@ package org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,10 +27,19 @@ import javax.inject.Named;
 import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonPostpendReplacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonPrependReplacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.JsonSearchReplacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.Replacer;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.ReplacerStream;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy.replacer.SearchReplacer;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyDataAccess;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.JsonSearcher;
+import org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.StreamUtils;
 import org.sonatype.nexus.repository.cache.CacheInfo;
 import org.sonatype.nexus.repository.config.Configuration;
+import org.sonatype.nexus.repository.http.HttpMethods;
 import org.sonatype.nexus.repository.proxy.ProxyFacet;
 import org.sonatype.nexus.repository.proxy.ProxyFacetSupport;
 import org.sonatype.nexus.repository.storage.Asset;
@@ -38,18 +49,23 @@ import org.sonatype.nexus.repository.transaction.TransactionalTouchBlob;
 import org.sonatype.nexus.repository.transaction.TransactionalTouchMetadata;
 import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
+import org.sonatype.nexus.repository.view.Parameters;
+import org.sonatype.nexus.repository.view.Request;
+import org.sonatype.nexus.repository.view.Response;
+import org.sonatype.nexus.repository.view.ViewFacet;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.payloads.TempBlob;
 import org.sonatype.nexus.transaction.UnitOfWork;
 
-import com.google.common.base.Strings;
-import com.google.common.io.CharSource;
-import com.google.common.io.CharStreams;
-import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyDataAccess.HASH_ALGORITHMS;
+import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_ARTIFACT_MODULE_PARAM_NAME;
+import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_ARTIFACT_URI_PREFIX;
+import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_VERSION_URI_SUFFIX;
 
 /**
  * AnsibleGalaxy {@link ProxyFacet} implementation.
@@ -86,18 +102,27 @@ public class AnsibleGalaxyProxyFacetImpl
   @Override
   protected Content getCachedContent(final Context context) {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
-    if (assetKind.equals(AssetKind.API_INTERNALS)) {
-      return null; // results not stored
-    }
 
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case VERSION_LIST:
-        return getAsset(ansiblegalaxyPathUtils.versionListPath(matcherState));
-      case VERSION:
-        return getAsset(ansiblegalaxyPathUtils.versionPath(matcherState));
-      case ARTIFACT:
-        return getAsset(ansiblegalaxyPathUtils.artifactPath(matcherState));
+      case API_METADATA:
+        return getAsset(ansiblegalaxyPathUtils.apiMetadataPath(matcherState));
+      case COLLECTION_DETAIL:
+        return getAsset(ansiblegalaxyPathUtils.collectionDetailPath(matcherState));
+      case COLLECTION_VERSION_LIST:
+        return getAsset(ansiblegalaxyPathUtils.collectionVersionPagedPath(matcherState));
+      case COLLECTION_VERSION_DETAIL:
+        return getAsset(ansiblegalaxyPathUtils.collectionVersionDetailPath(matcherState));
+      case COLLECTION_ARTIFACT:
+        return getAsset(ansiblegalaxyPathUtils.collectionArtifactPath(matcherState));
+      case ROLE_SEARCH:
+        return getAsset(ansiblegalaxyPathUtils.roleSearchPath(matcherState));
+      case ROLE_DETAIL:
+        return getAsset(ansiblegalaxyPathUtils.roleDetailPath(matcherState));
+      case ROLE_VERSION_LIST:
+        return getAsset(ansiblegalaxyPathUtils.roleVersionPagedPath(matcherState));
+      case ROLE_ARTIFACT:
+        return getAsset(ansiblegalaxyPathUtils.roleArtifactPath(matcherState));
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
@@ -118,33 +143,42 @@ public class AnsibleGalaxyProxyFacetImpl
   protected Content store(final Context context, final Content content) throws IOException {
     AssetKind assetKind = context.getAttributes().require(AssetKind.class);
 
-    if (assetKind.equals(AssetKind.API_INTERNALS)) {
-      return content; // results not stored
-    }
-
     TokenMatcher.State matcherState = ansiblegalaxyPathUtils.matcherState(context);
     switch (assetKind) {
-      case VERSION_LIST:
-        return putAsset(content, ansiblegalaxyPathUtils.versionListPath(matcherState), assetKind);
-      case VERSION:
-        return putAsset(content, ansiblegalaxyPathUtils.versionPath(matcherState), assetKind);
-      case ARTIFACT:
-        AnsibleGalaxyAttributes ansiblegalaxyAttributes =
-            ansiblegalaxyPathUtils.getAttributesFromMatcherState(matcherState);
-        return putComponent(ansiblegalaxyAttributes, content, ansiblegalaxyPathUtils.artifactPath(matcherState),
-            assetKind);
+      case API_METADATA:
+        return putAsset(context, content, ansiblegalaxyPathUtils.apiMetadataPath(matcherState), assetKind);
+      case COLLECTION_DETAIL:
+        return putAsset(context, content, ansiblegalaxyPathUtils.collectionDetailPath(matcherState), assetKind);
+      case COLLECTION_VERSION_LIST:
+        return putAsset(context, content, ansiblegalaxyPathUtils.collectionVersionPagedPath(matcherState), assetKind);
+      case COLLECTION_VERSION_DETAIL:
+        return putComponent(context, ansiblegalaxyPathUtils.getCollectionAttributes(matcherState), content,
+            ansiblegalaxyPathUtils.collectionVersionDetailPath(matcherState), assetKind);
+      case COLLECTION_ARTIFACT:
+        return putComponent(context, ansiblegalaxyPathUtils.getCollectionAttributes(matcherState), content,
+            ansiblegalaxyPathUtils.collectionArtifactPath(matcherState), assetKind);
+      case ROLE_SEARCH:
+        return putAsset(context, content, ansiblegalaxyPathUtils.roleSearchPath(matcherState), assetKind);
+      case ROLE_DETAIL:
+        return putAsset(context, content, ansiblegalaxyPathUtils.roleDetailPath(matcherState), assetKind);
+      case ROLE_VERSION_LIST:
+        return putAsset(context, content, ansiblegalaxyPathUtils.roleVersionPagedPath(matcherState), assetKind);
+      case ROLE_ARTIFACT:
+        return putComponent(context, ansiblegalaxyPathUtils.getRoleAttributes(matcherState), content,
+            ansiblegalaxyPathUtils.roleArtifactPath(matcherState), assetKind);
       default:
         throw new IllegalStateException("Received an invalid AssetKind of type: " + assetKind.name());
     }
   }
 
   private Content putAsset(
+      final Context context,
       final Content content,
       final String assetPath,
       final AssetKind assetKind) throws IOException
   {
     StorageFacet storageFacet = facet(StorageFacet.class);
-    try (InputStream updatedStream = replaceContent(content.openInputStream())) {
+    try (InputStream updatedStream = getUpdatedContent(context, assetKind, content.openInputStream())) {
       try (TempBlob tempBlob = storageFacet.createTempBlob(updatedStream, HASH_ALGORITHMS)) {
         return ansiblegalaxyDataAccess.maybeCreateAndSaveAsset(getRepository(), assetPath, assetKind, tempBlob,
             content);
@@ -152,27 +186,70 @@ public class AnsibleGalaxyProxyFacetImpl
     }
   }
 
-  private InputStream replaceContent(InputStream in) throws IOException {
-    String content =
-        Strings.nullToEmpty(CharStreams.toString(new InputStreamReader(in, StandardCharsets.UTF_8))).trim();
-    String repoAbsoluteUrl = getRepository().getUrl() + "/";
-    String remoteUrl = getRemoteUrl().toString();
-    String replacedContent = content.replaceAll(remoteUrl, repoAbsoluteUrl);
-    log.trace("content replace:\n\t---> old: {}\n\t---> new: {}", content, replacedContent);
-    return new ReaderInputStream(CharSource.wrap(replacedContent).openStream(), StandardCharsets.UTF_8);
-  }
-
   private Content putComponent(
+      final Context context,
       final AnsibleGalaxyAttributes ansibleGalaxyAttributes,
       final Content content,
       final String assetPath,
       final AssetKind assetKind) throws IOException
   {
     StorageFacet storageFacet = facet(StorageFacet.class);
-    try (TempBlob tempBlob = storageFacet.createTempBlob(content.openInputStream(), HASH_ALGORITHMS)) {
-      return ansiblegalaxyDataAccess.maybeCreateAndSaveComponent(getRepository(), ansibleGalaxyAttributes, assetPath,
-          tempBlob, content, assetKind);
+    try (InputStream updatedStream = getUpdatedContent(context, assetKind, content.openInputStream())) {
+      try (TempBlob tempBlob = storageFacet.createTempBlob(updatedStream, HASH_ALGORITHMS)) {
+        return ansiblegalaxyDataAccess.maybeCreateAndSaveComponent(getRepository(), ansibleGalaxyAttributes, assetPath,
+            tempBlob, content, assetKind);
+      }
     }
+  }
+
+  private InputStream getUpdatedContent(Context context, AssetKind assetKind, InputStream in) throws IOException {
+    if (assetKind == AssetKind.COLLECTION_ARTIFACT || assetKind == AssetKind.ROLE_ARTIFACT) {
+      return in; // do not modify
+    }
+    else if (assetKind == AssetKind.ROLE_VERSION_LIST) {
+      List<Replacer> replacers = new ArrayList<>();
+      // add nxrm context path to paging URI:
+      final String pageFieldName = "next_link";
+      replacers.add(new JsonPrependReplacer(pageFieldName, "/repository/" + getRepository().getName()));
+
+      // replace artifact download links so they are handled by this proxy repo:
+      final String downloadUrlFieldName = "download_url";
+      replacers.add(new JsonSearchReplacer(downloadUrlFieldName, getRoleArtifactUpstreamUrl(),
+          getRepository().getUrl() + ROLE_ARTIFACT_URI_PREFIX));
+
+      // update download links to include data used by nxrm for storage:
+      String moduleName = getModuleName(context);
+      if (StringUtils.isNotBlank(moduleName)) {
+        String queryString = String.format("?%s=%s", ROLE_ARTIFACT_MODULE_PARAM_NAME, moduleName);
+        replacers.add(new JsonPostpendReplacer(downloadUrlFieldName, queryString));
+      }
+
+      return new ReplacerStream(replacers).getReplacedContent(in);
+    }
+
+    // default: replace all upstream URLs with repo URLs
+    SearchReplacer urlReplacer = new SearchReplacer(getRemoteUrl().toString(), getRepository().getUrl() + "/");
+    return new ReplacerStream(urlReplacer).getReplacedContent(in);
+  }
+
+  private String getModuleName(Context context) {
+    String path = context.getRequest().getPath().replaceFirst(ROLE_VERSION_URI_SUFFIX, "");
+    Request roleDetailRequest = new Request.Builder().copy(context.getRequest()).action(HttpMethods.GET).path(path)
+        .parameters(new Parameters()).build();
+    Context roleDetailContext = new Context(context.getRepository(), roleDetailRequest);
+    roleDetailContext.getAttributes().set(AssetKind.class, AssetKind.ROLE_DETAIL);
+    try {
+      final String moduleFieldName = "name";
+      log.info("searching for '{}' via: '{}'", moduleFieldName, roleDetailRequest);
+      final Response response = context.getRepository().facet(ViewFacet.class).dispatch(roleDetailRequest, context);
+      try (InputStream stream = response.getPayload().openInputStream()) {
+        return new JsonSearcher(moduleFieldName).getValue(StreamUtils.toString(stream));
+      }
+    }
+    catch (Exception e) {
+      log.error("can't load {}", roleDetailRequest, e);
+    }
+    return null;
   }
 
   @Override
@@ -200,8 +277,42 @@ public class AnsibleGalaxyProxyFacetImpl
 
   @Override
   protected String getUrl(@Nonnull final Context context) {
-    String url = AnsibleGalaxyPathUtils.getUri(context.getRequest()).substring(1);
-    log.debug("url: {}", url);
-    return url;
+    String uri = getUri(context.getRequest()).substring(1);
+    log.debug("uri for upstream request: {}", uri);
+    return uri;
   }
+
+  /**
+   * Returns relative URI, including query parameters.
+   */
+  private static String getUri(final Request request) {
+    StringBuilder sb = new StringBuilder(request.getPath());
+    Parameters params = request.getParameters();
+    if (null != params && !params.isEmpty()) {
+      sb.append("?");
+
+      String queryString = params.entries().stream().map(param -> param.getKey() + "=" + param.getValue())
+          .collect(Collectors.joining("&"));
+      sb.append(queryString);
+    }
+
+    return sb.toString();
+  }
+
+  @Override
+  protected HttpRequestBase buildFetchHttpRequest(URI uri, Context context) {
+    if (context.getRequest().getPath().startsWith(ROLE_ARTIFACT_URI_PREFIX)) {
+      log.debug("rebuilding role artifact request for {}; orig = {}", context.getRequest(), uri);
+      URI newUri = ansiblegalaxyPathUtils.rebuildRoleDownloadUri(uri, getRoleArtifactUpstreamUrl());
+      log.debug("updated fetch request: {} -> {}", uri, newUri);
+      return super.buildFetchHttpRequest(newUri, context);
+    }
+    return super.buildFetchHttpRequest(uri, context);
+  }
+
+  private String getRoleArtifactUpstreamUrl() {
+    // TODO: this should be a configurable repository item entered by user on UI
+    return "https://github.com";
+  }
+
 }

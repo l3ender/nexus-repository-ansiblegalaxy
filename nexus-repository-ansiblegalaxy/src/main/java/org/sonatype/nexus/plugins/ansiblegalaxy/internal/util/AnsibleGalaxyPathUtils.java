@@ -12,7 +12,8 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.util;
 
-import java.util.Map.Entry;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -20,12 +21,11 @@ import javax.inject.Singleton;
 import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata.AnsibleGalaxyAttributes;
 import org.sonatype.nexus.repository.view.Context;
-import org.sonatype.nexus.repository.view.Parameters;
-import org.sonatype.nexus.repository.view.Request;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,7 +38,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class AnsibleGalaxyPathUtils
 {
 
-  private static final Logger LOG = Loggers.getLogger(AnsibleGalaxyPathUtils.class);
+  private static final String METADATA_PATH = "metadata";
+
+  private static final String API_PATH = "api";
+
+  private static final String COLLECTION_PATH = "collection";
+
+  private static final String ROLE_PATH = "role";
+
+  public static final String ROLE_VERSION_URI_SUFFIX = "versions/";
+
+  public static final String ROLE_ARTIFACT_MODULE_PARAM_NAME = "module";
+
+  public static final String ROLE_ARTIFACT_URI_PREFIX = "/download/role";
+
+  private final Logger log = Loggers.getLogger(getClass());
 
   /**
    * Returns the author from a {@link TokenMatcher.State}.
@@ -55,9 +69,21 @@ public class AnsibleGalaxyPathUtils
     return match(state, "version");
   }
 
+  public String version(final Context context) {
+    return version(matcherState(context));
+  }
+
+  public String id(final TokenMatcher.State state) {
+    return match(state, "id");
+  }
+
+  public String page(final TokenMatcher.State state) {
+    return StringUtils.defaultIfBlank(state.getTokens().get("pagenum"), "1");
+  }
+
   public TokenMatcher.State matcherState(final Context context) {
     State state = context.getAttributes().require(TokenMatcher.State.class);
-    LOG.info("matched state tokens: {}", state.getTokens());
+    log.debug("matched state tokens: {}", state.getTokens());
     return state;
   }
 
@@ -71,57 +97,119 @@ public class AnsibleGalaxyPathUtils
     return result;
   }
 
-  public String versionListPath(final State matcherState) {
-    String author = author(matcherState);
-    String module = module(matcherState);
-    String page = StringUtils.defaultIfBlank(matcherState.getTokens().get("pagenum"), "1");
-
-    return String.format("%s/%s/versions%s", author, module, page);
+  public String apiMetadataPath(final State matcherState) {
+    return String.format("%s/%s/detail.json", METADATA_PATH, API_PATH);
   }
 
-  public String versionPath(final State matcherState) {
+  public String collectionDetailPath(final State matcherState) {
+    String author = author(matcherState);
+    String module = module(matcherState);
+
+    return String.format("%s/%s/%s/detail.json", COLLECTION_PATH, author, module);
+  }
+
+  public String collectionVersionPagedPath(final State matcherState) {
+    String author = author(matcherState);
+    String module = module(matcherState);
+    String page = page(matcherState);
+
+    return String.format("%s/%s/%s/versions%s.json", COLLECTION_PATH, author, module, page);
+  }
+
+  public String roleSearchPath(final State matcherState) {
+    String author = author(matcherState);
+    String module = module(matcherState);
+    String page = page(matcherState);
+
+    return String.format("%s/%s/%s/roles%s.json", ROLE_PATH, author, module, page);
+  }
+
+  public String roleDetailPath(final State matcherState) {
+    String id = id(matcherState);
+
+    return String.format("%s/%s/%s/detail.json", METADATA_PATH, ROLE_PATH, id);
+  }
+
+  public String roleVersionPagedPath(final State matcherState) {
+    String id = id(matcherState);
+    String page = page(matcherState);
+
+    return String.format("%s/%s/%s/versions%s.json", METADATA_PATH, ROLE_PATH, id, page);
+  }
+
+  public String collectionVersionDetailPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
     String version = version(matcherState);
 
-    return String.format("%s/%s/%s/version", author, module, version);
+    return String.format("%s/%s/%s/%s/detail.json", COLLECTION_PATH, author, module, version);
   }
 
-  public String artifactPath(final State matcherState) {
+  private String artifactPath(final State matcherState) {
     String author = author(matcherState);
     String module = module(matcherState);
     String version = version(matcherState);
 
-    return String.format("%s/%s/%s/artifact", author, module, version);
+    return String.format("%s/%s/%s/%s.tar.gz", author, module, version, version);
   }
 
-  public AnsibleGalaxyAttributes getAttributesFromMatcherState(final TokenMatcher.State state) {
-    return new AnsibleGalaxyAttributes(author(state), module(state), version(state));
+  public String collectionArtifactPath(final State matcherState) {
+    return String.format("%s/%s", COLLECTION_PATH, artifactPath(matcherState));
+  }
+
+  public String roleArtifactPath(final State matcherState) {
+    return String.format("%s/%s", ROLE_PATH, artifactPath(matcherState));
+  }
+
+  private AnsibleGalaxyAttributes getAttributesFromMatcherState(final TokenMatcher.State state, String groupPath) {
+    String group = String.format("%s/%s", groupPath, author(state));
+    return new AnsibleGalaxyAttributes(group, module(state), version(state));
+  }
+
+  public AnsibleGalaxyAttributes getCollectionAttributes(final TokenMatcher.State state) {
+    return getAttributesFromMatcherState(state, COLLECTION_PATH);
+  }
+
+  public AnsibleGalaxyAttributes getRoleAttributes(final TokenMatcher.State state) {
+    return getAttributesFromMatcherState(state, ROLE_PATH);
   }
 
   /**
-   * Returns relative URI, including query parameters.
+   * Used by proxy handler to send request to actual/real download location, which can be different than the proxy
+   * repo's upstream endpoint.
+   * 
+   * @param originalUpstream example:
+   *          https://galaxy.ansible.com/download/role/geerlingguy/ansible-role-jenkins/archive/3.0.0.tar.gz
+   * @param desiredUpstreamUrl example: https://github.com
+   * @return example: https://github.com/geerlingguy/ansible-role-jenkins/archive/3.0.0.tar.gz
    */
-  public static String getUri(final Request request) {
-    StringBuilder sb = new StringBuilder(request.getPath());
-    Parameters params = request.getParameters();
-    if (null != params) {
-      int index = 0;
+  public URI rebuildRoleDownloadUri(URI originalUpstream, String desiredUpstreamUrl) {
+    final String schemeSeparator = "://";
+    String desiredScheme = StringUtils.substringBefore(desiredUpstreamUrl, schemeSeparator);
+    String desiredUrlWithoutScheme = StringUtils.substringAfter(desiredUpstreamUrl, schemeSeparator);
 
-      for (Entry<String, String> param : params) {
-        if (index == 0) {
-          sb.append("?");
-        }
-        else {
-          sb.append("&");
-        }
-        sb.append(param.getKey()).append("=").append(param.getValue());
-      }
+    final String pathSeparator = "/";
+    String desiredHost = StringUtils.substringBefore(desiredUrlWithoutScheme, pathSeparator);
+    String desiredPath = StringUtils.substringAfter(desiredUrlWithoutScheme, pathSeparator);
+
+    if (desiredPath.endsWith(pathSeparator)) {
+      desiredPath = StringUtils.chop(desiredPath);
     }
 
-    String result = sb.toString();
-    LOG.trace("uri: {}", result);
+    String upstreamPath = originalUpstream.getPath().replaceFirst(ROLE_ARTIFACT_URI_PREFIX, "");
 
-    return result;
+    String path = upstreamPath;
+    if (StringUtils.isNotBlank(desiredPath)) {
+      path = "/" + desiredPath + path;
+    }
+
+    try {
+      return new URIBuilder(originalUpstream).setScheme(desiredScheme).setHost(desiredHost).setPath(path).build();
+    }
+    catch (URISyntaxException e) {
+      log.error("cannot update http request from {} -> {}", originalUpstream, desiredUpstreamUrl, e);
+      return originalUpstream;
+    }
   }
+
 }

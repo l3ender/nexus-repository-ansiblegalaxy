@@ -21,6 +21,7 @@ import org.sonatype.nexus.repository.view.Parameters;
 import org.sonatype.nexus.repository.view.Request;
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher.State;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.MapUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -85,31 +85,76 @@ public class QueryTokenMatcherTest
     underTest = new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/");
     parameters.set("test", "abc");
     boolean matches = underTest.matches(context);
-    assertFalse(matches);
+    assertTrue(matches);
 
-    parameters.set("page", "1");
-    matches = underTest.matches(context);
-    assertFalse(matches);
+    State state = context.getAttributes().get(State.class);
+    assertThat(state, notNullValue());
+    Map<String, String> tokens = state.getTokens();
+    assertTrue(MapUtils.isNotEmpty(tokens));
+    assertThat(tokens.get("apiversion"), is(equalTo("v2")));
+    assertThat(tokens.get("author"), is(equalTo("azure")));
+    assertThat(tokens.get("module"), is(equalTo("azcollection")));
+    assertThat(tokens.get("test"), nullValue());
   }
 
   @Test
-  public void testUrlWithoutQueryParam() {
-    underTest = new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/?page={pagenum}");
+  public void testQueryUriWithoutQueryParam() {
+    underTest = new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/",
+        ImmutableMap.of("page", "pagenum"));
     boolean matches = underTest.matches(context);
-    assertFalse(matches);
+    assertTrue(matches);
+
+    State state = context.getAttributes().get(State.class);
+    assertThat(state, notNullValue());
+    Map<String, String> tokens = state.getTokens();
+    assertTrue(MapUtils.isNotEmpty(tokens));
+    assertThat(tokens.get("apiversion"), is(equalTo("v2")));
+    assertThat(tokens.get("author"), is(equalTo("azure")));
+    assertThat(tokens.get("module"), is(equalTo("azcollection")));
+    assertThat(tokens.get("pagenum"), nullValue());
   }
 
   @Test
-  public void testWithUnmatchinQueryParam() {
-    underTest = new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/?page={pagenum}");
+  public void testQueryUriWithUnmatchingQueryParam() {
+    underTest = new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/",
+        ImmutableMap.of("page", "pagenum"));
     parameters.set("test", "abc");
     boolean matches = underTest.matches(context);
-    assertFalse(matches);
+    assertTrue(matches);
+
+    State state = context.getAttributes().get(State.class);
+    assertThat(state, notNullValue());
+    Map<String, String> tokens = state.getTokens();
+    assertTrue(MapUtils.isNotEmpty(tokens));
+    assertThat(tokens.get("apiversion"), is(equalTo("v2")));
+    assertThat(tokens.get("author"), is(equalTo("azure")));
+    assertThat(tokens.get("module"), is(equalTo("azcollection")));
+    assertThat(tokens.get("pagenum"), nullValue());
   }
 
   @Test
-  public void testWithMatchingQueryParam() {
-    underTest = new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/?page={pagenum}");
+  public void testQueryUriWithMatchingQueryParam() {
+    underTest = new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/",
+        ImmutableMap.of("page", "pagenum"));
+    parameters.set("page", "5");
+    boolean matches = underTest.matches(context);
+    assertTrue(matches);
+
+    State state = context.getAttributes().get(State.class);
+    assertThat(state, notNullValue());
+    Map<String, String> tokens = state.getTokens();
+    assertTrue(MapUtils.isNotEmpty(tokens));
+    assertThat(tokens.get("apiversion"), is(equalTo("v2")));
+    assertThat(tokens.get("author"), is(equalTo("azure")));
+    assertThat(tokens.get("module"), is(equalTo("azcollection")));
+    assertThat(tokens.get("pagenum"), is(equalTo("5")));
+  }
+
+  @Test
+  public void testWithMultipleQueryParam() {
+    underTest = new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/",
+        ImmutableMap.of("page", "pagenum"));
+    parameters.set("abc", "test");
     parameters.set("page", "5");
     boolean matches = underTest.matches(context);
     assertTrue(matches);
