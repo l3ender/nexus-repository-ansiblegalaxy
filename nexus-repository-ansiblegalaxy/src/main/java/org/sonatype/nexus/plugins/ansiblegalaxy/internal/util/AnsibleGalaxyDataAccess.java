@@ -13,9 +13,7 @@
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.util;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
@@ -103,7 +101,7 @@ public class AnsibleGalaxyDataAccess
   public Content saveAsset(
       final StorageTx tx,
       final Asset asset,
-      final Supplier<InputStream> contentSupplier,
+      final TempBlob contentSupplier,
       final Payload payload) throws IOException
   {
     AttributesMap contentAttributes = null;
@@ -123,7 +121,7 @@ public class AnsibleGalaxyDataAccess
   public Content saveAsset(
       final StorageTx tx,
       final Asset asset,
-      final Supplier<InputStream> contentSupplier,
+      final TempBlob contentSupplier,
       final String contentType,
       @Nullable final AttributesMap contentAttributes) throws IOException
   {
