@@ -59,6 +59,6 @@ The command above tells ansible-galaxy to fetch (and install) packages from your
 
 ### Role installation support
 
-A bug exists in the `ansible-galaxy` client where role artifacts are downloaded directly from github.com instead of honoring the Galaxy API's result indicating `download_url`. [A fix](https://github.com/ansible/ansible/pull/73114) has been opened in the Ansible repo and is pending merge/release into a future version of the product.
+Due to [a bug](https://github.com/ansible/ansible/issues/73103) in Ansible prior to version 2.12, `ansible-galaxy` would download roles directly from Github.com, even if the `download_url` for the role specified a different location. This resulted in artifacts not being downloaded through Nexus when using this repository format.
 
-In the meantime, you can branch the above repo with the fix to resolve downloads through Nexus, or adjust your infrastructure accordingly to account for the issue.
+[The fix](https://github.com/ansible/ansible/pull/73114) was merged and released in [Ansible 2.12.0](https://github.com/ansible/ansible/blob/e312665990d353ed2ab8610237de3da52da58560/changelogs/CHANGELOG-v2.12.rst#v2120). Please be sure to use version 2.12.0 (or later) to avoid the issue, or adjust your infrastructure accordingly.
