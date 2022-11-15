@@ -18,7 +18,10 @@
 
 # Table Of Contents
 
+* [Getting Started](#getting-started)
+* [Version compatibility matrix](#version-compatibility-matrix)
 * [Developing](#developing)
+   * [TODOs](#todos)
    * [Requirements](#requirements)
    * [Download](#download)
    * [Building](#building)
@@ -35,7 +38,22 @@
 * [Getting Help](#getting-help)
 * [Integration Tests](#integration-tests)
 
+
+## Getting started
+
+[We have detailed instructions on how to get started here!](docs/ansiblegalaxy_user_documentation.md)
+
+## Version compatibility matrix
+| PLugin version | NXRM version |
+|----------------|:------------:|
+| 0.3.0          |  \>= 3.41.0  |
+| 0.2.1          |  =< 3.37.0   |
+
 ## Developing
+
+### TODOs
+- Group repositories
+- Support new databases formats from NXRM PRO 
 
 ### Requirements
 

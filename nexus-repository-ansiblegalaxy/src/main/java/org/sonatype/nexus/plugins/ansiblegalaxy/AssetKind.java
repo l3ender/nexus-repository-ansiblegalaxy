@@ -12,9 +12,9 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy;
 
-import javax.annotation.Nonnull;
-
 import org.sonatype.nexus.repository.cache.CacheControllerHolder.CacheType;
+
+import javax.annotation.Nonnull;
 
 import static org.sonatype.nexus.repository.cache.CacheControllerHolder.CONTENT;
 import static org.sonatype.nexus.repository.cache.CacheControllerHolder.METADATA;
@@ -22,26 +22,25 @@ import static org.sonatype.nexus.repository.cache.CacheControllerHolder.METADATA
 /**
  * Asset kinds for AnsibleGalaxy.
  */
-public enum AssetKind
-{
-  API_METADATA(METADATA),
-  COLLECTION_DETAIL(METADATA),
-  COLLECTION_VERSION_LIST(METADATA),
-  COLLECTION_VERSION_DETAIL(METADATA),
-  COLLECTION_ARTIFACT(CONTENT),
-  ROLE_SEARCH(METADATA),
-  ROLE_DETAIL(METADATA),
-  ROLE_VERSION_LIST(METADATA),
-  ROLE_ARTIFACT(CONTENT);
+public enum AssetKind {
+    API_METADATA(METADATA),
+    COLLECTION_DETAIL(METADATA),
+    COLLECTION_VERSION_LIST(METADATA),
+    COLLECTION_VERSION_DETAIL(METADATA),
+    COLLECTION_ARTIFACT(CONTENT),
+    ROLE_SEARCH(METADATA),
+    ROLE_DETAIL(METADATA),
+    ROLE_VERSION_LIST(METADATA),
+    ROLE_ARTIFACT(CONTENT);
 
-  private final CacheType cacheType;
+    private final CacheType cacheType;
 
-  AssetKind(final CacheType cacheType) {
-    this.cacheType = cacheType;
-  }
+    AssetKind(final CacheType cacheType) {
+        this.cacheType = cacheType;
+    }
 
-  @Nonnull
-  public CacheType getCacheType() {
-    return cacheType;
-  }
+    @Nonnull
+    public CacheType getCacheType() {
+        return cacheType;
+    }
 }

@@ -18,7 +18,6 @@ import org.sonatype.nexus.repository.view.Content;
 
 @Facet.Exposed
 public interface AnsibleGalaxyProxyFacet
-    extends ProxyFacet
-{
-  Content getAsset(final String assetPath);
+        extends ProxyFacet {
+    Content getAsset(final String assetPath);
 }
