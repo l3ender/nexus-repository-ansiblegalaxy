@@ -45,7 +45,7 @@ You must set the Galaxy API endpoint/server when using the client, either by:
 
 See the following resources for additional detail:
 * [Ansible documentation on configuring the `ansible-galaxy` client](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#configuring-the-ansible-galaxy-client).
-* [Ansible configuration documentation](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#galaxy-server)).
+* [Ansible configuration documentation](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#galaxy-server).
 
 ### Usage
 
