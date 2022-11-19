@@ -13,7 +13,7 @@
 
 -->
 
-### Overview
+## Ansible Galaxy Configuration
 
 [Ansible Galaxy](https://galaxy.ansible.com/) provides a way to install community collections and roles for Ansible.
 
@@ -23,11 +23,11 @@ You can create a proxy repository in Nexus Repository Manager (NXRM) that will c
 [https://galaxy.ansible.com/](https://galaxy.ansible.com/). Then, you can make the `ansible-galaxy` client use your Nexus Repository Proxy 
 instead of the remote repository.
 
-### Installation
+## Installation
 
-See [installing the plugin](../README.md#installing-the-plugin).
+Ensure the plugin is installed in your Nexus environment (see [installing the plugin](../README.md#installing-the-plugin)).
 
-### Repository configuration
+## Repository configuration
  
 To proxy an Ansible Galaxy repository, you simply create a new 'ansiblegalaxy (proxy)' as documented in 
 [Repository Management](https://help.sonatype.com/repomanager3/configuration/repository-management) in
@@ -37,7 +37,7 @@ detail. Minimal configuration steps are:
 - Define URL for 'Remote storage' - e.g. [https://galaxy.ansible.com/](https://galaxy.ansible.com/)
 - Select a `Blob store` for `Storage`
 
-### Configuring the `ansible-galaxy` client
+## Configuring the `ansible-galaxy` client
 
 You must set the Galaxy API endpoint/server when using the client, either by:
 * provide the `-s API_SERVER` or `--server API_SERVER` argument for each installation command.
@@ -47,7 +47,7 @@ See the following resources for additional detail:
 * [Ansible documentation on configuring the `ansible-galaxy` client](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#configuring-the-ansible-galaxy-client).
 * [Ansible configuration documentation](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#galaxy-server).
 
-### Usage
+## Usage
 
 Using the `ansible-galaxy` client, you can now download packages from your NXRM Ansible Galaxy proxy:
 
@@ -57,7 +57,7 @@ ansible-galaxy collection install azure.azcollection -s http://localhost:8081/re
 
 The command above tells ansible-galaxy to fetch (and install) packages from your NXRM Ansible Galaxy proxy. The NXRM Ansible Galaxy proxy will download any missing packages from the remote Ansible Galaxy repository, and cache the packages on the NXRM Ansible Galaxy proxy. The next time any client requests the same package from your NXRM Ansible Galaxy proxy, the already cached package will be returned to the client.
 
-### Role installation support
+## Role installation support
 
 Due to [a bug](https://github.com/ansible/ansible/issues/73103) in Ansible prior to version 2.12, `ansible-galaxy` would download roles directly from Github.com, even if the `download_url` for the role specified a different location. This resulted in artifacts not being downloaded through Nexus when using this repository format.
 
