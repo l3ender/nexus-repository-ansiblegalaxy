@@ -15,16 +15,11 @@
 <!-- generated with nexus-format-archetype version 1.0.48 on Dec 27, 2020 -->
 # Nexus Repository Ansible Galaxy Format
 
-
-# Table Of Contents
+## Table Of Contents
 
 * [Getting Started](#getting-started)
 * [Version compatibility matrix](#version-compatibility-matrix)
 * [Developing](#developing)
-   * [TODOs](#todos)
-   * [Requirements](#requirements)
-   * [Download](#download)
-   * [Building](#building)
 * [Using Ansible Galaxy with Nexus Repository Manager 3](#using-ansiblegalaxy-with-nexus-repository-manager-3)
 * [Compatibility with Nexus Repository Manager 3 Versions](#compatibility-with-nexus-repository-manager-3-versions)
 * [Features Implemented In This Plugin](#features-implemented-in-this-plugin)
@@ -51,60 +46,11 @@
 
 ## Developing
 
-### TODOs
-- Group repositories
-- Support new databases formats from NXRM PRO 
-
-### Requirements
-
-* [Apache Maven 3.3.3+](https://maven.apache.org/install.html)
-* [Java 8](https://adoptopenjdk.net)
-* Network access to https://repository.sonatype.org/content/groups/sonatype-public-grid
-
-Also, there is a good amount of information available at [Bundle Development](https://help.sonatype.com/display/NXRM3/Bundle+Development).
-
-You may also find it helpful to configure your IDE to use the [Sonatype Code style](https://github.com/sonatype/codestyle).
-
-### Download
-
- Pre-compiled plugin files can be found on the [releases page](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases).
-
-### Building
-
-To build the project and generate the bundle use Maven:
-```bash
-mvn clean package -PbuildKar
-```
-
-If everything checks out, the bundle for ansiblegalaxy should be available in the `target` folder.
-
-#### Build with Docker
-
-```bash
-docker build -t nexus-repository-ansiblegalaxy .
-```
-
-#### Run as a Docker container
-
-```bash
-docker run -d -p 8081:8081 --name nexus-repository-ansiblegalaxy nexus-repository-ansiblegalaxy 
-```
-
-For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
-
-After allowing some time to spin up, the application will be available from your browser at http://localhost:8081.
-
-To read the generated admin password for your first login to the web UI, you can use the command below against the running docker container:
-
-```bash
-docker exec -it nexus-repository-ansiblegalaxy cat /nexus-data/admin.password && echo
-```
-
-For simplicity, you should check `Enable anonymous access` in the prompts following your first login.   
+[View development documentation to get started](docs/developing.md)
 
 ## Using Ansible Galaxy With Nexus Repository Manager 3
 
-[We have detailed instructions on how to get started here!](docs/ansiblegalaxy_user_documentation.md)
+[See instructions on how to get started!](docs/ansiblegalaxy_user_documentation.md)
 
 ## Compatibility with Nexus Repository Manager 3 Versions
 
@@ -115,6 +61,7 @@ The table below outlines what version of Nexus Repository the plugin was built a
 | v0.1.0         | 3.29.1-01                |
 | v0.2.0         | 3.29.1-01                |
 | v0.2.1         | 3.31.0-01                |
+| v0.2.2         | 3.38.0-01                |
 
 If a new version of Nexus Repository is released and the plugin needs changes, a new release will be made, and this
 table will be updated to indicate which version of Nexus Repository it will function against. This is done on a time 
@@ -123,7 +70,7 @@ plugin and send us a PR after testing it out!
 
 All released versions can be found on [the releases page](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases).
 
-## Features Implemented In This Plugin 
+## Features Implemented In This Plugin
 
 | Feature | Implemented          |
 |---------|----------------------|
@@ -146,31 +93,29 @@ Be sure to [configure the `ansible-galaxy` client](docs/ansiblegalaxy_user_docum
 
 ## Installing the plugin
 
-There are a range of options for installing the ansiblegalaxy plugin. You'll need to build it first, and
-then install the plugin with the options shown below:
+There are a range of options for installing the ansiblegalaxy plugin. You'll need to build it first, and then install the plugin with the options shown below.
 
 ### Easiest Install
 
-Thanks to some upstream work in Nexus Repository, it's become a LOT easier to install a plugin. To install the `ansiblegalaxy` plugin, follow these steps:
+To install the `ansiblegalaxy` plugin, follow these steps:
 
-* Build the plugin with `mvn clean package -PbuildKar`
-* Copy the `nexus-repository-ansiblegalaxy-*-bundle.kar` file from your `target` folder to the `deploy` folder for your Nexus Repository installation.
+* Download the plugin from [the releases page](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases) or build from source as described on the [development documentation](docs/developing.md).
+* Copy the `nexus-repository-ansiblegalaxy-*-bundle.kar` file from the downloaded location (or from `target` folder, if building from source) to the `deploy` folder for your Nexus Repository installation.
 
 Once you've done this, go ahead and either restart Nexus Repo, or go ahead and start it if it wasn't running to begin with.
 
-You should see `ansiblegalaxy (proxy)` in the available Repository Recipes to use, if all has gone according to plan :)
+You should now see `ansiblegalaxy (proxy)` in the available Repository Recipes.
 
 ### Temporary Install
 
-Installations done via the Karaf console will be wiped out with every restart of Nexus Repository. This is a
-good installation path if you are just testing or doing development on the plugin.
+Installations can be done via the Karaf console and will be wiped out with every restart of Nexus Repository. This is a good installation path if you are just testing or doing development on the plugin.
 
 * Enable Nexus Repo console: edit `<nexus_dir>/bin/nexus.vmoptions` and change `karaf.startLocalConsole`  to `true`.
 
   More details here: [Bundle Development](https://help.sonatype.com/display/NXRM3/Bundle+Development+Overview)
 
 * Run Nexus Repo console:
-  ```
+  ```bash
   # sudo su - nexus
   $ cd <nexus_dir>/bin
   $ ./nexus run
@@ -178,7 +123,7 @@ good installation path if you are just testing or doing development on the plugi
   > bundle:list
   ```
   (look for org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy ID, should be the last one)
-  ```
+  ```bash
   > bundle:start <org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy ID>
   ```
 
@@ -188,16 +133,14 @@ For more permanent installs of the nexus-repository-ansiblegalaxy plugin, follow
 
 * Copy the bundle (nexus-repository-ansiblegalaxy-*.jar) into <nexus_dir>/deploy
 
-This will cause the plugin to be loaded with each restart of Nexus Repository. As well, this folder is monitored
-by Nexus Repository and the plugin should load within 60 seconds of being copied there if Nexus Repository
-is running. You will still need to start the bundle using the karaf commands mentioned in the temporary install.
+This will cause the plugin to be loaded with each restart of Nexus Repository. As well, this folder is monitored by Nexus Repository and the plugin should load within 60 seconds of being copied there if Nexus Repository is running. You will still need to start the bundle using the karaf commands mentioned in the temporary install.
 
 ### (most) Permanent Install
 
-If you are trying to use the ansiblegalaxy plugin permanently, it likely makes more sense to do the following:
+If you are trying to use the ansiblegalaxy plugin permanently, it makes more sense to do the following:
 
-* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-ansiblegalaxy/0.2.1/nexus-repository-ansiblegalaxy-0.2.1.jar`
-* Make the following additions marked with + to `<nexus_dir>/system/org/sonatype/nexus/assemblies/nexus-core-feature/3.x.y/nexus-core-feature-3.x.y-features.xml`
+* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-ansiblegalaxy/0.2.2/nexus-repository-ansiblegalaxy-0.2.2.jar`
+* Make the following additions marked with + to `<nexus_dir>/system/org/sonatype/nexus/assemblies/nexus-core-feature/3.x.y/nexus-core-feature-3.x.y-features.xml`:
 
    ```
          <feature prerequisite="false" dependency="false">wrap</feature>
@@ -205,35 +148,28 @@ If you are trying to use the ansiblegalaxy plugin permanently, it likely makes m
    ```
    to the `<feature name="nexus-core-feature" description="org.sonatype.nexus.assemblies:nexus-core-feature" version="3.x.y.xy">` section below the last (above is an example, the exact last one may vary).
    
-   And
+   And add the following as the last feature:
    ```
-   + <feature name="nexus-repository-ansiblegalaxy" description="org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy" version="0.2.1">
+   + <feature name="nexus-repository-ansiblegalaxy" description="org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy" version="0.2.2">
    +     <details>org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy</details>
-   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-ansiblegalaxy/0.2.1</bundle>
+   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-ansiblegalaxy/0.2.2</bundle>
    + </feature>
     </features>
    ```
-   as the last feature.
 
 This will cause the plugin to be loaded and started with each startup of Nexus Repository.
 
 ## The Fine Print
 
-It is worth noting that this is **NOT SUPPORTED** by Sonatype, and is a contribution of ours
-to the open source community (read: you!)
+It is worth noting that this is **NOT SUPPORTED** by Sonatype, and is a contribution of ours to the open source community (read: you!)
 
-Don't worry, using this community item does not "void your warranty". In a worst case scenario, you may be asked 
-by the Sonatype Support team to remove the community item in order to determine the root cause of any issues.
+Don't worry, using this community item does not "void your warranty". In a worst case scenario, you may be asked by the Sonatype Support team to remove the community item in order to determine the root cause of any issues.
 
 Remember:
 
-* Use this contribution at the risk tolerance that you have
-* Do NOT file Sonatype support tickets related to Ansible Galaxy support in regard to this plugin
-* DO file issues here on GitHub, so that the community can pitch in
-
-Phew, that was easier than I thought. Last but not least of all:
-
-Have fun creating and using this plugin and the Nexus platform, we are glad to have you here!
+* Use this contribution at the risk tolerance that you have.
+* Do NOT file Sonatype support tickets related to Ansible Galaxy support in regard to this plugin.
+* DO file issues here on GitHub, so that the community can pitch in.
 
 ## Getting help
 
@@ -247,7 +183,7 @@ Looking to contribute to our code but need some help? There's a few ways to get 
 
 There a still some rough edges around writing integration tests, which are noted below. Please report any problems you find.
 
-The project has a “format” module, and an “IT” module. This allows the “format” module to be bundled up and used by the IT framework classes in the “it” module.
+The project has a "format" module, and an "IT" module. This allows the "format" module to be bundled up and used by the IT framework classes in the "it" module.
 
 In this project, the sub module [nexus-repository-ansiblegalaxy](nexus-repository-ansiblegalaxy) is the "format" module, while the sub module[nexus-repository-ansiblegalaxy-it](nexus-repository-ansiblegalaxy-it) is the "it" module.
 

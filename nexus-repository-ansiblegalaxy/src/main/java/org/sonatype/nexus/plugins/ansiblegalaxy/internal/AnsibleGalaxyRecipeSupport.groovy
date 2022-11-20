@@ -76,6 +76,9 @@ abstract class AnsibleGalaxyRecipeSupport
     public Provider<AttributesFacet> attributesFacet
 
     @Inject
+    Provider<ElasticSearchFacet> searchFacet
+
+    @Inject
     public ExceptionHandler exceptionHandler
 
     @Inject

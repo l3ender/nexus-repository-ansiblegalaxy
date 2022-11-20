@@ -13,7 +13,9 @@
 
 -->
 
-# Table Of Contents
+## Ansible Galaxy Configuration
+
+## Table Of Contents
 
 * [Overview](#overview)
 * [Installation](#installation)
@@ -24,23 +26,23 @@
 * [Publishing Packages](#publishing-ackages)
 * [Role installation support](#role-installation-support)
 
-### Overview
+## Overview
 
 [Ansible Galaxy](https://galaxy.ansible.com/) provides a way to install community collections and roles for Ansible.
 
 Full documentation on installing `ansible-galaxy` can be found on [the Ansible Galaxy project website](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html).
 
-You can create a proxy repository in Nexus Repository Manager (NXRM) that will cache packages from a remote Ansible Galaxy repository, like
-[https://galaxy.ansible.com/](https://galaxy.ansible.com/).     
-You can also create a hosted repository to handle your own collections.    
-Then, you can make the `ansible-galaxy` client use your Nexus Repository 
-instead of the remote repository.
+You can create a proxy repository in Nexus Repository Manager (NXRM) that will cache packages from a remote Ansible Galaxy repository, like [https://galaxy.ansible.com/](https://galaxy.ansible.com/).     
 
-### Installation
+You can also create a hosted repository to handle your own collections.
 
-See [installing the plugin](../README.md#installing-the-plugin).
+Then, you can make the `ansible-galaxy` client use your Nexus Repository  instead of the remote repository.
 
-### Repository configuration
+## Installation
+
+Ensure the plugin is installed in your Nexus environment (see [installing the plugin](../README.md#installing-the-plugin)).
+
+## Repository configuration
  
 To create an Ansible Galaxy repository, you simply create a new 'ansiblegalaxy (proxy)' or  'ansiblegalaxy (hosted)' as documented in 
 [Repository Management](https://help.sonatype.com/repomanager3/configuration/repository-management) in
@@ -50,7 +52,7 @@ detail. Minimal configuration steps are:
 - Define URL for 'Remote storage' - e.g. [https://galaxy.ansible.com/](https://galaxy.ansible.com/) => only for proxy
 - Select a `Blob store` for `Storage`
 
-### Configuring the `ansible-galaxy` client
+## Configuring the `ansible-galaxy` client
 
 You must set the Galaxy API endpoint/server when using the client, either by:
 * provide the `-s API_SERVER` or `--server API_SERVER` argument for each installation command.
@@ -74,9 +76,9 @@ url=http://127.0.0.1:8081/repository/ansible-proxy/
 
 See the following resources for additional detail:
 * [Ansible documentation on configuring the `ansible-galaxy` client](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#configuring-the-ansible-galaxy-client).
-* [Ansible configuration documentation](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#galaxy-server)).
+* [Ansible configuration documentation](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#galaxy-server).
 
-### Usage
+## Usage
 
 Using the `ansible-galaxy` client, you can now download packages from your NXRM Ansible Galaxy:
 
@@ -110,7 +112,7 @@ source filename, and <namespace>, <collectionname>, and <version> path segments 
 
 *Note that the path segments should be the same as your collection manifest.
 
-### Role installation support
+## Role installation support
 
 Due to [a bug](https://github.com/ansible/ansible/issues/73103) in Ansible prior to version 2.12, `ansible-galaxy` would download roles directly from Github.com, even if the `download_url` for the role specified a different location. This resulted in artifacts not being downloaded through Nexus when using this repository format.
 
