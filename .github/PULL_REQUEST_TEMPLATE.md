@@ -14,4 +14,4 @@ update the docs, as well)
 It relates to the following issue #s:
 * Fixes #X
 
-cc @DarthHater @bhamail
+cc @DarthHater @bhamail @l3ender

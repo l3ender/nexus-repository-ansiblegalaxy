@@ -1,0 +1,10 @@
+# declaration of NEXUS_VERSION must appear before first FROM command
+# see: https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
+ARG NEXUS_VERSION=latest
+
+FROM sonatype/nexus3:$NEXUS_VERSION
+
+ARG DEPLOY_DIR=/opt/sonatype/nexus/deploy/
+USER root
+COPY nexus-repository-ansiblegalaxy/target/nexus-repository-ansiblegalaxy-*-bundle.kar ${DEPLOY_DIR}
+USER nexus
