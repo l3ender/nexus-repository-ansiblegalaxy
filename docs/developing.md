@@ -50,7 +50,7 @@ docker build -f Dockerfile-dev -t nexus-repository-ansiblegalaxy .
 After building the Docker image, you can run as follows:
 
 ```bash
-docker run -d -p 8081:8081 --name nexus-repository-ansiblegalaxy nexus-repository-ansiblegalaxy 
+docker run -d -p 8081:8081 --name nexus-repository-ansiblegalaxy nexus-repository-ansiblegalaxy
 ```
 
 For further information like how to persist volumes check out [the GitHub repo for our official image](https://github.com/sonatype/docker-nexus3).
