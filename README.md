@@ -48,6 +48,7 @@ The table below outlines what version of Nexus Repository the plugin was built a
 | v0.1.0         | 3.29.1-01                |
 | v0.2.0         | 3.29.1-01                |
 | v0.2.1         | 3.31.0-01                |
+| v0.2.2         | 3.38.0-01                |
 
 If a new version of Nexus Repository is released and the plugin needs changes, a new release will be made, and this
 table will be updated to indicate which version of Nexus Repository it will function against. This is done on a time 
@@ -125,7 +126,7 @@ This will cause the plugin to be loaded with each restart of Nexus Repository. A
 
 If you are trying to use the ansiblegalaxy plugin permanently, it makes more sense to do the following:
 
-* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-ansiblegalaxy/0.2.1/nexus-repository-ansiblegalaxy-0.2.1.jar`
+* Copy the bundle into `<nexus_dir>/system/org/sonatype/nexus/plugins/nexus-repository-ansiblegalaxy/0.2.2/nexus-repository-ansiblegalaxy-0.2.2.jar`
 * Make the following additions marked with + to `<nexus_dir>/system/org/sonatype/nexus/assemblies/nexus-core-feature/3.x.y/nexus-core-feature-3.x.y-features.xml`:
 
    ```
@@ -136,9 +137,9 @@ If you are trying to use the ansiblegalaxy plugin permanently, it makes more sen
    
    And add the following as the last feature:
    ```
-   + <feature name="nexus-repository-ansiblegalaxy" description="org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy" version="0.2.1">
+   + <feature name="nexus-repository-ansiblegalaxy" description="org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy" version="0.2.2">
    +     <details>org.sonatype.nexus.plugins:nexus-repository-ansiblegalaxy</details>
-   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-ansiblegalaxy/0.2.1</bundle>
+   +     <bundle>mvn:org.sonatype.nexus.plugins/nexus-repository-ansiblegalaxy/0.2.2</bundle>
    + </feature>
     </features>
    ```
