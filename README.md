@@ -18,7 +18,6 @@
 ## Table Of Contents
 
 * [Getting Started](#getting-started)
-* [Version compatibility matrix](#version-compatibility-matrix)
 * [Developing](#developing)
 * [Using Ansible Galaxy with Nexus Repository Manager 3](#using-ansiblegalaxy-with-nexus-repository-manager-3)
 * [Compatibility with Nexus Repository Manager 3 Versions](#compatibility-with-nexus-repository-manager-3-versions)
@@ -38,12 +37,6 @@
 
 [We have detailed instructions on how to get started here!](docs/ansiblegalaxy_user_documentation.md)
 
-## Version compatibility matrix
-| PLugin version | NXRM version |
-|----------------|:------------:|
-| 0.3.0          |  \>= 3.41.0  |
-| 0.2.1          |  =< 3.37.0   |
-
 ## Developing
 
 [View development documentation to get started](docs/developing.md)
@@ -61,7 +54,8 @@ The table below outlines what version of Nexus Repository the plugin was built a
 | v0.1.0         | 3.29.1-01                |
 | v0.2.0         | 3.29.1-01                |
 | v0.2.1         | 3.31.0-01                |
-| v0.2.2         | 3.38.0-01                |
+| v0.2.2         | 3.38.0-01 / 3.39.0.01    |
+| v0.3.0         | \>= 3.41.0               |
 
 If a new version of Nexus Repository is released and the plugin needs changes, a new release will be made, and this
 table will be updated to indicate which version of Nexus Repository it will function against. This is done on a time 
@@ -96,7 +90,6 @@ Be sure to [configure the `ansible-galaxy` client](docs/ansiblegalaxy_user_docum
 There are a range of options for installing the ansiblegalaxy plugin. You'll need to build it first, and then install the plugin with the options shown below.
 
 ### Easiest Install
-
 To install the `ansiblegalaxy` plugin, follow these steps:
 
 * Download the plugin from [the releases page](https://github.com/l3ender/nexus-repository-ansiblegalaxy/releases) or build from source as described on the [development documentation](docs/developing.md).
