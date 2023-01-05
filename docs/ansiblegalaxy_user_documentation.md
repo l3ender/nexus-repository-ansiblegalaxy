@@ -23,7 +23,7 @@
 * [Configuring the client](#configuring-the-ansible-galaxy-client)
 * [Usage](#usage)
 * [Browsing Repository Packages](#browsing-repository-packages)
-* [Publishing Packages](#publishing-ackages)
+* [Publishing Packages](#publishing-packages)
 * [Role installation support](#role-installation-support)
 
 ## Overview
