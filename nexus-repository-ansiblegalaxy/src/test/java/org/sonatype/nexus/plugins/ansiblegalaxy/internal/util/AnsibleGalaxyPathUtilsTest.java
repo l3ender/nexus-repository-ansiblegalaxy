@@ -126,7 +126,7 @@ public class AnsibleGalaxyPathUtilsTest
   public void collectionArtifactPath() {
     String result = underTest.collectionArtifactPath(state);
 
-    assertThat(result, is(equalTo("collection/azure/azcollection/1.2.0/1.2.0.tar.gz")));
+    assertThat(result, is(equalTo("collection/azure/azcollection/1.2.0/azure-azcollection-1.2.0.tar.gz")));
   }
 
   @Test
@@ -143,7 +143,7 @@ public class AnsibleGalaxyPathUtilsTest
   public void roleArtifactPath() {
     String result = underTest.roleArtifactPath(state);
 
-    assertThat(result, is(equalTo("role/azure/azcollection/1.2.0/1.2.0.tar.gz")));
+    assertThat(result, is(equalTo("role/azure/azcollection/1.2.0/azure-azcollection-1.2.0.tar.gz")));
   }
 
   private static final String ORIG_UPSTREAM_URL =

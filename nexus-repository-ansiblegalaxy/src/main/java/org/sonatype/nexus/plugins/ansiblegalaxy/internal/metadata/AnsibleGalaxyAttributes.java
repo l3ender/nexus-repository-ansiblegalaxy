@@ -12,32 +12,51 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.metadata;
 
+import java.util.List;
+
 /**
  * Object for storing AnsibleGalaxy specific attributes.
  */
-public final class AnsibleGalaxyAttributes
-{
-  private final String group;
+public final class AnsibleGalaxyAttributes {
+    private final String group;
+    private final String name;
+    private final String version;
+    private String description;
+    private List<AnsibleGalaxyDependencyAttributes> dependencies;
 
-  private final String name;
+    public AnsibleGalaxyAttributes(String group, String name, String version) {
+        this.group = group;
+        this.name = name;
+        this.version = version;
+        description = "";
+    }
 
-  private final String version;
+    public String getGroup() {
+        return group;
+    }
 
-  public AnsibleGalaxyAttributes(String group, String name, String version) {
-    this.group = group;
-    this.name = name;
-    this.version = version;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public String getGroup() {
-    return group;
-  }
+    public String getVersion() {
+        return version;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  public String getVersion() {
-    return version;
-  }
+    public void setDescription(final String description) {
+        this.description = description;
+    }
+
+    public List<AnsibleGalaxyDependencyAttributes> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(List<AnsibleGalaxyDependencyAttributes> dependencies) {
+        this.dependencies = dependencies;
+    }
+
 }

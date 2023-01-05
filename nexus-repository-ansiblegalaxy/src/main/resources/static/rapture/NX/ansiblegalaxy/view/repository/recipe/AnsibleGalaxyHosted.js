@@ -10,23 +10,27 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.plugins.ansiblegalaxy;
+Ext.define('NX.ansiblegalaxy.view.repository.recipe.AnsibleGalaxyHosted', {
+    extend: 'NX.coreui.view.repository.RepositorySettingsForm',
+    alias: 'widget.nx-coreui-repository-ansiblegalaxy-hosted',
+    requires: [
+        'NX.coreui.view.repository.facet.StorageFacet',
+        'NX.coreui.view.repository.facet.StorageFacetHosted',
+        'NX.coreui.view.repository.facet.CleanupPolicyFacet'
+    ],
 
-import org.sonatype.nexus.repository.Format;
+    /**
+     * @override
+     */
+    initComponent: function () {
+        var me = this;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+        me.items = [
+            {xtype: 'nx-coreui-repository-storage-facet'},
+            {xtype: 'nx-coreui-repository-storage-hosted-facet'},
+            {xtype: 'nx-coreui-repository-cleanup-policy-facet'}
+        ];
 
-/**
- * AnsibleGalaxy repository format.
- */
-@Named(AnsibleGalaxyFormat.NAME)
-@Singleton
-public class AnsibleGalaxyFormat
-        extends Format {
-    public static final String NAME = "ansiblegalaxy";
-
-    public AnsibleGalaxyFormat() {
-        super(NAME);
+        me.callParent();
     }
-}
+});

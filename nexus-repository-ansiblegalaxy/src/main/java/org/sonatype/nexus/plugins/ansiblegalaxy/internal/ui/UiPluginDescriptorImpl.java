@@ -12,21 +12,20 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.ui;
 
+import org.sonatype.nexus.rapture.UiPluginDescriptorSupport;
+
 import javax.annotation.Priority;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
-import org.sonatype.nexus.rapture.UiPluginDescriptorSupport;
 
 @Named
 @Singleton
 @Priority(Integer.MAX_VALUE - 200)
 public class UiPluginDescriptorImpl
-    extends UiPluginDescriptorSupport
-{
-  public UiPluginDescriptorImpl() {
-    super("nexus-repository-ansiblegalaxy");
-    setNamespace("NX.ansiblegalaxy");
-    setConfigClassName("NX.ansiblegalaxy.app.PluginConfig");
-  }
+        extends UiPluginDescriptorSupport {
+    public UiPluginDescriptorImpl() {
+        super("nexus-repository-ansiblegalaxy");
+        setNamespace("NX.ansiblegalaxy");
+        setConfigClassName("NX.ansiblegalaxy.app.PluginConfig");
+    }
 }

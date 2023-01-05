@@ -11,16 +11,16 @@
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
 Ext.define('NX.ansiblegalaxy.util.AnsibleGalaxyRepositoryUrls', {
-  '@aggregate_priority': 90,
+    '@aggregate_priority': 90,
 
-  singleton: true,
-  requires: [
-    'NX.coreui.util.RepositoryUrls',
-    'NX.util.Url'
-  ]
-}, function(self) {
-	NX.coreui.util.RepositoryUrls.addRepositoryUrlStrategy('ansiblegalaxy', function (assetModel) {
-      var repositoryName = assetModel.get('repositoryName'), assetName = assetModel.get('name');
-      return NX.util.Url.asLink(NX.util.Url.baseUrl + '/repository/' + repositoryName + '/' + assetName, assetName);
+    singleton: true,
+    requires: [
+        'NX.coreui.util.RepositoryUrls',
+        'NX.util.Url'
+    ]
+}, function (self) {
+    NX.coreui.util.RepositoryUrls.addRepositoryUrlStrategy('ansiblegalaxy', function (me, assetModel) {
+        var repositoryName = assetModel.get('repositoryName'), assetName = me.getAssetName(assetModel);
+        return NX.util.Url.asLink(NX.util.Url.baseUrl + '/repository/' + encodeURIComponent(repositoryName) + '/' + encodeURI(assetName), assetName);
     });
 });

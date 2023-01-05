@@ -15,9 +15,7 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal
 
-import javax.inject.Inject
-import javax.inject.Provider
-
+import org.slf4j.Logger
 import org.sonatype.goodies.common.Loggers
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.security.AnsibleGalaxySecurityFacet
@@ -40,21 +38,15 @@ import org.sonatype.nexus.repository.storage.UnitOfWorkHandler
 import org.sonatype.nexus.repository.view.ConfigurableViewFacet
 import org.sonatype.nexus.repository.view.Context
 import org.sonatype.nexus.repository.view.Matcher
-import org.sonatype.nexus.repository.view.handlers.ConditionalRequestHandler
-import org.sonatype.nexus.repository.view.handlers.ContentHeadersHandler
-import org.sonatype.nexus.repository.view.handlers.ExceptionHandler
-import org.sonatype.nexus.repository.view.handlers.HandlerContributor
-import org.sonatype.nexus.repository.view.handlers.LastDownloadedHandler
-import org.sonatype.nexus.repository.view.handlers.TimingHandler
+import org.sonatype.nexus.repository.view.handlers.*
 import org.sonatype.nexus.repository.view.matchers.ActionMatcher
 import org.sonatype.nexus.repository.view.matchers.logic.LogicMatchers
 import org.sonatype.nexus.repository.view.matchers.token.TokenMatcher
 
-import org.slf4j.Logger
+import javax.inject.Inject
+import javax.inject.Provider
 
-import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_ARTIFACT_MODULE_PARAM_NAME
-import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_ARTIFACT_URI_PREFIX
-import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.ROLE_VERSION_URI_SUFFIX
+import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyPathUtils.*
 import static org.sonatype.nexus.repository.http.HttpMethods.GET
 import static org.sonatype.nexus.repository.http.HttpMethods.HEAD
 
@@ -62,153 +54,168 @@ import static org.sonatype.nexus.repository.http.HttpMethods.HEAD
  * Support for AnsibleGalaxy recipes.
  */
 abstract class AnsibleGalaxyRecipeSupport
-extends RecipeSupport {
-  private static final Logger LOG = Loggers.getLogger(AnsibleGalaxyRecipeSupport.class)
+        extends RecipeSupport {
+    private static final Logger LOG = Loggers.getLogger(AnsibleGalaxyRecipeSupport.class)
 
-  @Inject
-  Provider<AnsibleGalaxySecurityFacet> securityFacet
+    @Inject
+    public Provider<AnsibleGalaxySecurityFacet> securityFacet
 
-  @Inject
-  Provider<ConfigurableViewFacet> viewFacet
+    @Inject
+    public Provider<ConfigurableViewFacet> viewFacet
 
-  @Inject
-  Provider<StorageFacet> storageFacet
+    //not in example
+    @Inject
+    public Provider<StorageFacet> storageFacet
 
-  @Inject
-  Provider<ElasticSearchFacet> searchFacet
+    //not in example
+    @Inject
+    public Provider<ElasticSearchFacet> searchFacet
 
-  @Inject
-  Provider<AttributesFacet> attributesFacet
+    //not in example
+    @Inject
+    public Provider<AttributesFacet> attributesFacet
 
-  @Inject
-  ExceptionHandler exceptionHandler
+    @Inject
+    public ExceptionHandler exceptionHandler
 
-  @Inject
-  TimingHandler timingHandler
+    @Inject
+    public TimingHandler timingHandler
 
-  @Inject
-  SecurityHandler securityHandler
+    @Inject
+    IndexHtmlForwardHandler indexHtmlForwardHandler
 
-  @Inject
-  PartialFetchHandler partialFetchHandler
+    @Inject
+    public SecurityHandler securityHandler
 
-  @Inject
-  ConditionalRequestHandler conditionalRequestHandler
+    @Inject
+    public PartialFetchHandler partialFetchHandler
 
-  @Inject
-  ContentHeadersHandler contentHeadersHandler
+    @Inject
+    public ConditionalRequestHandler conditionalRequestHandler
 
-  @Inject
-  UnitOfWorkHandler unitOfWorkHandler
+    @Inject
+    public ContentHeadersHandler contentHeadersHandler
 
-  @Inject
-  HandlerContributor handlerContributor
+    @Inject
+    public UnitOfWorkHandler unitOfWorkHandler
 
-  @Inject
-  Provider<DefaultComponentMaintenanceImpl> componentMaintenanceFacet
+    @Inject
+    public HandlerContributor handlerContributor
 
-  @Inject
-  Provider<HttpClientFacet> httpClientFacet
+    @Inject
+    public Provider<DefaultComponentMaintenanceImpl> componentMaintenanceFacet
 
-  @Inject
-  Provider<PurgeUnusedFacet> purgeUnusedFacet
+    @Inject
+    public Provider<HttpClientFacet> httpClientFacet
 
-  @Inject
-  Provider<NegativeCacheFacet> negativeCacheFacet
+    @Inject
+    public Provider<PurgeUnusedFacet> purgeUnusedFacet
 
-  @Inject
-  NegativeCacheHandler negativeCacheHandler
+    @Inject
+    public Provider<NegativeCacheFacet> negativeCacheFacet
 
-  @Inject
-  RoutingRuleHandler routingRuleHandler
+    @Inject
+    public NegativeCacheHandler negativeCacheHandler
 
-  @Inject
-  LastDownloadedHandler lastDownloadedHandler
+    @Inject
+    public RoutingRuleHandler routingRuleHandler
 
-  protected AnsibleGalaxyRecipeSupport(final Type type, final Format format) {
-    super(type, format)
-  }
+    @Inject
+    public LastDownloadedHandler lastDownloadedHandler
 
-  static Matcher apiInternalsMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/api"),
-        setAssetKind(AssetKind.API_METADATA)
+    @Inject
+    protected AnsibleGalaxyRecipeSupport(final Type type, final Format format) {
+        super(type, format)
+    }
+
+    static Matcher apiInternalsMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new TokenMatcher("/api"),
+                setAssetKind(AssetKind.API_METADATA)
         )
-  }
+    }
 
-  static Matcher collectionDetailMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/"),
-        setAssetKind(AssetKind.COLLECTION_DETAIL)
+    static Matcher collectionDetailMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/", [page: "pagenum", page_size: "limit"]),
+                setAssetKind(AssetKind.COLLECTION_DETAIL)
         )
-  }
+    }
 
-  static Matcher collectionVersionListMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/", [page: "pagenum"]),
-        setAssetKind(AssetKind.COLLECTION_VERSION_LIST)
+    static Matcher collectionVersionListMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new QueryTokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/", [page: "pagenum", page_size: "limit"]),
+                setAssetKind(AssetKind.COLLECTION_VERSION_LIST)
         )
-  }
+    }
 
-  static Matcher collectionVersionDetailMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/{version}/"),
-        setAssetKind(AssetKind.COLLECTION_VERSION_DETAIL)
+    static Matcher collectionVersionDetailMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new TokenMatcher("/api/{apiversion}/collections/{author}/{module}/versions/{version}/"),
+                setAssetKind(AssetKind.COLLECTION_VERSION_DETAIL)
         )
-  }
+    }
 
-  static Matcher collectionArtifactMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
-        setAssetKind(AssetKind.COLLECTION_ARTIFACT)
+    static Matcher collectionArtifactMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
+                setAssetKind(AssetKind.COLLECTION_ARTIFACT)
         )
-  }
+    }
 
-  static Matcher roleSearchMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new QueryTokenMatcher("/api/{apiversion}/roles/", [owner__username: "author", name: "module"]),
-        setAssetKind(AssetKind.ROLE_SEARCH)
+    static Matcher collectionArtifactIhmMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new TokenMatcher("/collection/{author}/{module}/{version}/{author}-{module}-{version}.tar.gz"),
+                setAssetKind(AssetKind.COLLECTION_ARTIFACT)
         )
-  }
+    }
 
-  static Matcher roleDetailMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new TokenMatcher("/api/{apiversion}/roles/{id}/"),
-        setAssetKind(AssetKind.ROLE_DETAIL)
+    static Matcher roleSearchMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new QueryTokenMatcher("/api/{apiversion}/roles/", [owner__username: "author", name: "module"]),
+                setAssetKind(AssetKind.ROLE_SEARCH)
         )
-  }
+    }
 
-  static Matcher roleVersionListMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new QueryTokenMatcher("/api/{apiversion}/roles/{id}/${ROLE_VERSION_URI_SUFFIX}", [page: "pagenum"]),
-        setAssetKind(AssetKind.ROLE_VERSION_LIST)
+    static Matcher roleDetailMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new TokenMatcher("/api/{apiversion}/roles/{id}/"),
+                setAssetKind(AssetKind.ROLE_DETAIL)
         )
-  }
+    }
 
-  static Matcher roleArtifactMatcher() {
-    LogicMatchers.and(
-        new ActionMatcher(GET, HEAD),
-        new QueryTokenMatcher(ROLE_ARTIFACT_URI_PREFIX + "/{author}/{reponame}/archive/{version}.tar.gz", [(ROLE_ARTIFACT_MODULE_PARAM_NAME): "module"]),
-        setAssetKind(AssetKind.ROLE_ARTIFACT)
+    static Matcher roleVersionListMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new QueryTokenMatcher("/api/{apiversion}/roles/{id}/${ROLE_VERSION_URI_SUFFIX}", [page: "pagenum"]),
+                setAssetKind(AssetKind.ROLE_VERSION_LIST)
         )
-  }
+    }
 
-  private static Matcher setAssetKind(AssetKind assetKind) {
-    return new Matcher() {
-          @Override
-          boolean matches(final Context context) {
-            LOG.debug("{} matches {}", assetKind, context.getRequest())
-            context.attributes.set(AssetKind.class, assetKind)
-            return true;
-          }
+    static Matcher roleArtifactMatcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new QueryTokenMatcher(ROLE_ARTIFACT_URI_PREFIX + "/{author}/{reponame}/archive/{version}.tar.gz", [(ROLE_ARTIFACT_MODULE_PARAM_NAME): "module"]),
+                setAssetKind(AssetKind.ROLE_ARTIFACT)
+        )
+    }
+
+    private static Matcher setAssetKind(AssetKind assetKind) {
+        return new Matcher() {
+            @Override
+            boolean matches(final Context context) {
+                LOG.debug("{} matches {}", assetKind, context.getRequest())
+                context.attributes.set(AssetKind.class, assetKind)
+                return true
+            }
         }
-  }
+    }
 }

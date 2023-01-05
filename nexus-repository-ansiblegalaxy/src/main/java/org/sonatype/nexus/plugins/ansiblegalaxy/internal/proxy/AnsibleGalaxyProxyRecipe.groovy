@@ -12,12 +12,6 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy
 
-import javax.annotation.Nonnull
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
-import javax.inject.Singleton
-
 import org.sonatype.nexus.plugins.ansiblegalaxy.AnsibleGalaxyFormat
 import org.sonatype.nexus.plugins.ansiblegalaxy.internal.AnsibleGalaxyRecipeSupport
 import org.sonatype.nexus.repository.Format
@@ -31,6 +25,12 @@ import org.sonatype.nexus.repository.view.Route
 import org.sonatype.nexus.repository.view.Router
 import org.sonatype.nexus.repository.view.ViewFacet
 
+import javax.annotation.Nonnull
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Provider
+import javax.inject.Singleton
+
 /**
  * AnsibleGalaxy proxy repository recipe.
  * @since 0.0.1
@@ -38,72 +38,73 @@ import org.sonatype.nexus.repository.view.ViewFacet
 @Named(AnsibleGalaxyProxyRecipe.NAME)
 @Singleton
 class AnsibleGalaxyProxyRecipe
-extends AnsibleGalaxyRecipeSupport {
-  public static final String NAME = 'ansiblegalaxy-proxy'
+        extends AnsibleGalaxyRecipeSupport {
+    public static final String NAME = 'ansiblegalaxy-proxy'
 
-  @Inject
-  Provider<AnsibleGalaxyProxyFacetImpl> proxyFacet
+    @Inject
+    Provider<AnsibleGalaxyProxyFacetImpl> proxyFacet
 
-  @Inject
-  ProxyHandler proxyHandler
+    @Inject
+    ProxyHandler proxyHandler
 
-  @Inject
-  AnsibleGalaxyProxyRecipe(@Named(ProxyType.NAME) final Type type,
-  @Named(AnsibleGalaxyFormat.NAME) final Format format) {
-    super(type, format)
-  }
-
-  @Override
-  void apply(@Nonnull final Repository repository) throws Exception {
-    repository.attach(securityFacet.get())
-    repository.attach(configure(viewFacet.get()))
-    repository.attach(httpClientFacet.get())
-    repository.attach(negativeCacheFacet.get())
-    repository.attach(componentMaintenanceFacet.get())
-    repository.attach(proxyFacet.get())
-    repository.attach(storageFacet.get())
-    repository.attach(searchFacet.get())
-    repository.attach(purgeUnusedFacet.get())
-    repository.attach(attributesFacet.get())
-  }
-
-  /**
-   * Configure {@link ViewFacet}.
-   */
-  private ViewFacet configure(final ConfigurableViewFacet facet) {
-    Router.Builder builder = new Router.Builder()
-
-    [
-      apiInternalsMatcher(),
-      collectionDetailMatcher(),
-      collectionVersionListMatcher(),
-      collectionVersionDetailMatcher(),
-      collectionArtifactMatcher(),
-      roleSearchMatcher(),
-      roleDetailMatcher(),
-      roleVersionListMatcher(),
-      roleArtifactMatcher()
-    ].each { matcher ->
-      builder.route(new Route.Builder().matcher(matcher)
-          .handler(timingHandler)
-          .handler(securityHandler)
-          .handler(routingRuleHandler)
-          .handler(exceptionHandler)
-          .handler(handlerContributor)
-          .handler(negativeCacheHandler)
-          .handler(partialFetchHandler)
-          .handler(contentHeadersHandler)
-          .handler(conditionalRequestHandler)
-          .handler(unitOfWorkHandler)
-          .handler(lastDownloadedHandler)
-          .handler(proxyHandler)
-          .create())
+    @Inject
+    AnsibleGalaxyProxyRecipe(@Named(ProxyType.NAME) final Type type,
+                             @Named(AnsibleGalaxyFormat.NAME) final Format format) {
+        super(type, format)
     }
 
-    builder.defaultHandlers(HttpHandlers.notFound())
+    @Override
+    void apply(@Nonnull final Repository repository) throws Exception {
+        repository.attach(securityFacet.get())
+        repository.attach(configure(viewFacet.get()))
+        repository.attach(httpClientFacet.get())
+        repository.attach(negativeCacheFacet.get())
+        repository.attach(componentMaintenanceFacet.get())
+        repository.attach(proxyFacet.get())
+        repository.attach(storageFacet.get())
+        repository.attach(searchFacet.get())
+        repository.attach(purgeUnusedFacet.get())
+        repository.attach(attributesFacet.get())
+    }
 
-    facet.configure(builder.create())
+    /**
+     * Configure {@link ViewFacet}.
+     */
+    private ViewFacet configure(final ConfigurableViewFacet facet) {
+        Router.Builder builder = new Router.Builder()
 
-    return facet
-  }
+        [
+                apiInternalsMatcher(),
+                collectionDetailMatcher(),
+                collectionVersionListMatcher(),
+                collectionVersionDetailMatcher(),
+                collectionArtifactMatcher(),
+                collectionArtifactIhmMatcher(),
+                roleSearchMatcher(),
+                roleDetailMatcher(),
+                roleVersionListMatcher(),
+                roleArtifactMatcher()
+        ].each { matcher ->
+            builder.route(new Route.Builder().matcher(matcher)
+                    .handler(timingHandler)
+                    .handler(securityHandler)
+                    .handler(routingRuleHandler)
+                    .handler(exceptionHandler)
+                    .handler(handlerContributor)
+                    .handler(negativeCacheHandler)
+                    .handler(partialFetchHandler)
+                    .handler(contentHeadersHandler)
+                    .handler(conditionalRequestHandler)
+                    .handler(unitOfWorkHandler)
+                    .handler(lastDownloadedHandler)
+                    .handler(proxyHandler)
+                    .create())
+        }
+
+        builder.defaultHandlers(HttpHandlers.notFound())
+
+        facet.configure(builder.create())
+
+        return facet
+    }
 }

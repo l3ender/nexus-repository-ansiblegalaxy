@@ -12,26 +12,24 @@
  */
 package org.sonatype.nexus.plugins.ansiblegalaxy.internal.security;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.sonatype.nexus.repository.security.ContentPermissionChecker;
 import org.sonatype.nexus.repository.security.SecurityFacetSupport;
 import org.sonatype.nexus.repository.security.VariableResolverAdapter;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * AnsibleGalaxy format security facet.
  */
 @Named
 public class AnsibleGalaxySecurityFacet
-    extends SecurityFacetSupport
-{
-  @Inject
-  public AnsibleGalaxySecurityFacet(
-      final AnsibleGalaxyFormatSecurityContributor securityResource,
-      @Named("simple") final VariableResolverAdapter variableResolverAdapter,
-      final ContentPermissionChecker contentPermissionChecker)
-  {
-    super(securityResource, variableResolverAdapter, contentPermissionChecker);
-  }
+        extends SecurityFacetSupport {
+    @Inject
+    public AnsibleGalaxySecurityFacet(
+            final AnsibleGalaxyFormatSecurityContributor securityResource,
+            @Named("simple") final VariableResolverAdapter variableResolverAdapter,
+            final ContentPermissionChecker contentPermissionChecker) {
+        super(securityResource, variableResolverAdapter, contentPermissionChecker);
+    }
 }

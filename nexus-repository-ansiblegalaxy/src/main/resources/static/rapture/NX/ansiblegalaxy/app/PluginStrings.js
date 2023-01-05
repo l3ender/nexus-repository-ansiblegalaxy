@@ -17,20 +17,20 @@
  * AnsibleGalaxy plugin strings.
  */
 Ext.define('NX.ansiblegalaxy.app.PluginStrings', {
-  '@aggregate_priority': 90,
+    '@aggregate_priority': 90,
 
-  singleton: true,
-  requires: [
-    'NX.I18n'
-  ],
+    singleton: true,
+    requires: [
+        'NX.I18n'
+    ],
 
-  keys: {
-    Repository_Facet_AnsibleGalaxyFacet_Title: 'AnsibleGalaxy Settings',
-    SearchAnsibleGalaxy_Group: 'AnsibleGalaxy Repositories',
-    SearchAnsibleGalaxy_License_FieldLabel: 'License',
-    SearchAnsibleGalaxy_Text: 'AnsibleGalaxy',
-    SearchAnsibleGalaxy_Description: 'Search for components in AnsibleGalaxy repositories',
-  }
-}, function(self) {
-  NX.I18n.register(self);
+    keys: {
+        Repository_Facet_AnsibleGalaxyFacet_Title: 'AnsibleGalaxy Settings',
+        SearchAnsibleGalaxy_Group: 'AnsibleGalaxy Repositories',
+        SearchAnsibleGalaxy_License_FieldLabel: 'License',
+        SearchAnsibleGalaxy_Text: 'AnsibleGalaxy',
+        SearchAnsibleGalaxy_Description: 'Search for components in AnsibleGalaxy repositories',
+    }
+}, function (self) {
+    NX.I18n.register(self);
 });

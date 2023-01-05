@@ -11,10 +11,11 @@
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
 Ext.define('NX.ansiblegalaxy.app.PluginConfig', {
-  '@aggregate_priority': 100,
+    '@aggregate_priority': 100,
 
-  requires: [
-    'NX.ansiblegalaxy.app.PluginStrings',
-    'NX.ansiblegalaxy.util.AnsibleGalaxyRepositoryUrls'
-  ]
+    requires: [
+        'NX.ansiblegalaxy.app.PluginStrings',
+        'NX.ansiblegalaxy.app.SearchAnsibleGalaxy',
+        'NX.ansiblegalaxy.util.AnsibleGalaxyRepositoryUrls'
+    ]
 });
