@@ -199,7 +199,7 @@ public class AnsibleGalaxyHostedFacetImpl
         Iterable<Asset> assets;
         assets = tx.findAssets(Query
             .builder()
-            .where(P_NAME).like(String.format("%%%s/%s/%s%%", user, module, version))
+            .where(P_NAME).like(String.format("%%%s/%s/%s/%%", user, module, version))
             .build(), list);
         for (Asset assetX : assets) {
             asset = assetX;
