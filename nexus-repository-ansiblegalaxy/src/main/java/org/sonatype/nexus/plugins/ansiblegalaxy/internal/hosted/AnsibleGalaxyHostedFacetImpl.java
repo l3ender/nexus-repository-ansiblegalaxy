@@ -43,6 +43,7 @@ import static org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind.COLLECTION_ARTI
 import static org.sonatype.nexus.plugins.ansiblegalaxy.internal.util.AnsibleGalaxyDataAccess.HASH_ALGORITHMS;
 import static org.sonatype.nexus.repository.storage.AssetEntityAdapter.P_ASSET_KIND;
 import static org.sonatype.nexus.repository.storage.MetadataNodeEntityAdapter.P_NAME;
+import static org.sonatype.nexus.repository.storage.ComponentEntityAdapter.P_VERSION;
 
 
 @Named
@@ -85,7 +86,7 @@ public class AnsibleGalaxyHostedFacetImpl
 
         this.sorting = new ArrayList<>();
         this.sorting.add(SortBuilders.fieldSort(P_NAME).order(SortOrder.ASC));
-        this.sorting.add(SortBuilders.fieldSort(ComponentEntityAdapter.P_VERSION).order(SortOrder.ASC));
+        this.sorting.add(SortBuilders.fieldSort(P_VERSION).order(SortOrder.ASC));
     }
 
     @TransactionalTouchBlob
@@ -194,14 +195,20 @@ public class AnsibleGalaxyHostedFacetImpl
         list.add(getRepository());
         String baseUrlRepo = getRepository().getUrl();
         Asset asset = null;
+        String asset_version = null;
         Iterable<Asset> assets;
-        assets = tx.findAssets(Query.builder().where(P_NAME).like(String.format("%%%s/%s%%", user, module)).build(), list);
+        assets = tx.findAssets(Query
+            .builder()
+            .where(P_NAME).like(String.format("%%%s/%s/%s/%%", user, module, version))
+            .build(), list);
         for (Asset assetX : assets) {
             asset = assetX;
-            break;
+            asset_version = (String) asset.formatAttributes().get("version");
+            if ( asset_version.equals(version) ) { break; }
         }
+
         AnsibleGalaxyModule result = new AnsibleGalaxyModule();
-        result.setVersion(version)
+        result.setVersion(asset_version)
                 .setHref(ansibleGalaxyPathUtils.parseHref(baseUrlRepo, asset.attributes().child("ansiblegalaxy").get("name").toString(), asset.attributes().child("ansiblegalaxy").get("version").toString()))
                 .setDownload_url(ansibleGalaxyPathUtils.download(baseUrlRepo, user, module, version))
                 .setNamespace(new AnsibleGalaxyModule.AnsibleGalaxyModuleNamespace().setName(user))
@@ -274,4 +281,3 @@ public class AnsibleGalaxyHostedFacetImpl
         return component;
     }
 }
-
