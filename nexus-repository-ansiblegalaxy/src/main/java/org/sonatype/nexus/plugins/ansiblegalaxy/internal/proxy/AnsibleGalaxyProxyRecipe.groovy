@@ -78,6 +78,7 @@ class AnsibleGalaxyProxyRecipe
                 collectionDetailMatcher(),
                 collectionVersionListMatcher(),
                 collectionVersionDetailMatcher(),
+                collectionArtifactV2Matcher(),
                 collectionArtifactMatcher(),
                 collectionArtifactIhmMatcher(),
                 roleSearchMatcher(),

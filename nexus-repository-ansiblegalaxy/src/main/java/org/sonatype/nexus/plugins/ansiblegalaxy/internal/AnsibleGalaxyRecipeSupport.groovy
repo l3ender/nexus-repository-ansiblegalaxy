@@ -168,6 +168,14 @@ abstract class AnsibleGalaxyRecipeSupport
         )
     }
 
+    static Matcher collectionArtifactV2Matcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
+                setAssetKind(AssetKind.COLLECTION_ARTIFACT)
+        )
+    }
+
     // https://repo.angeloxx.lan/repository/galaxy/api/v3/plugin/ansible/content/published/collections/artifacts/telekom_mms-icinga_director-1.34.1.tar.gz
     // /api/v3/plugin/ansible/content/published/collections/artifacts/telekom_mms-icinga_director-1.34.1.tar.gz
     static Matcher collectionArtifactIhmMatcher() {
