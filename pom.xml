@@ -24,7 +24,7 @@
   </parent>
 
   <artifactId>nexus-repository-ansiblegalaxy-parent</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
   <packaging>pom</packaging>
 
   <inceptionYear>2020</inceptionYear>
