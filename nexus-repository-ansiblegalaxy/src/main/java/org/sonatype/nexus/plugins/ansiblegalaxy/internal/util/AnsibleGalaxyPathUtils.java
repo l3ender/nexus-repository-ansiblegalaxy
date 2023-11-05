@@ -156,11 +156,15 @@ public class AnsibleGalaxyPathUtils {
 
     public String download(String baseUrlRepo, final String author, final String module, final String version) {
 
-        return String.format("%s/download/%s.tar.gz", baseUrlRepo, author + "-" + module + "-" + version);
+        return String.format("%s/api/v3/plugin/ansible/content/published/collections/artifacts/%s.tar.gz", baseUrlRepo, author + "-" + module + "-" + version);
     }
 
     public String collectionArtifactPath(final State matcherState) {
-        return String.format("%s/%s", COLLECTION_PATH, artifactPath(matcherState));
+        String author = author(matcherState);
+        String module = module(matcherState);
+        String version = version(matcherState);
+        //return String.format("%s/%s", COLLECTION_PATH, artifactPath(matcherState));
+        return String.format("api/v3/plugin/ansible/content/published/collections/artifacts/%s-%s-%s.tar.gz", author, module, version);
     }
 
     public String parseHref(String baseUrlRepo, final String name, final String version) {
@@ -169,7 +173,8 @@ public class AnsibleGalaxyPathUtils {
     }
 
     public String collectionArtifactPath(final String author, final String module, final String version) {
-        return String.format("%s/%s", COLLECTION_PATH, artifactPath(author, module, version));
+        // return String.format("%s/%s", COLLECTION_PATH, artifactPath(author, module, version));
+        return String.format("api/v3/plugin/ansible/content/published/collections/artifacts/%s-%s-%s.tar.gz", author, module, version);
     }
 
     public String collectionNamePath(final String author, final String module) {
