@@ -151,6 +151,14 @@ abstract class AnsibleGalaxyRecipeSupport
                 setAssetKind(AssetKind.COLLECTION_VERSION_LIST)
         )
     }
+    // /api/v3/plugin/ansible/content/published/collections/index/ansible/netcommon/versions/
+    static Matcher collectionVersionListMatcherPages() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new QueryTokenMatcher("/api/{apiversion}/plugin/ansible/content/published/collections/index/{author}/{module}/versions/", [limit: "limit", offset: "offset"]),
+                setAssetKind(AssetKind.COLLECTION_VERSION_LIST_LIMIT)
+        )
+    }
 
     static Matcher collectionVersionDetailMatcher() {
         LogicMatchers.and(
