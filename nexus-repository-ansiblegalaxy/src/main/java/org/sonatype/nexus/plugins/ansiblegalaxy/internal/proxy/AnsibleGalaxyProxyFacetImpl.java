@@ -238,15 +238,14 @@ public class AnsibleGalaxyProxyFacetImpl
             replacers.add(new JsonPrependReplacer("first", "/repository/" + getRepository().getName()));
             replacers.add(new JsonPrependReplacer("previous", "/repository/" + getRepository().getName()));
             replacers.add(new JsonPrependReplacer("last", "/repository/" + getRepository().getName()));
+            replacers.add(new JsonPrependReplacer("next", "/repository/" + getRepository().getName()));
 
-            // If Agent <= 2.13.9 remove Next (backward compatibility, reduce options)
+            // If client version < 2.13.9 remove "next" (backward compatibility, reduce options)
             String userAgent = context.getRequest().getHeaders().get("User-Agent");
             if (userAgent != null && userAgent.startsWith("ansible-galaxy/")) {
                 if (isUserAgentVersionLowerOrEqual(userAgent, "2.13.9")) {
-                    log.trace("backward compatibility layer in action, mind some version will be omitted");
+                    log.info("Backward compatibility layer in action, mind some versions will be omitted");
                     replacers.add(new JsonSearchReplacer("next", ""));
-                } else {
-                    replacers.add(new JsonPrependReplacer("next", "/repository/" + getRepository().getName()));
                 }
             }
 
@@ -267,7 +266,7 @@ public class AnsibleGalaxyProxyFacetImpl
 
             return userAgentVersion.compareTo(targetVersion) <= 0;
         } catch (InvalidVersionSpecificationException e) {
-            // gestisci l'eccezione
+            log.info("isUserAgentVersionLowerOrEqual returns an error ({} vs {}), assuming false", userAgent, targetVersionString);
             return false;
         }
     }
