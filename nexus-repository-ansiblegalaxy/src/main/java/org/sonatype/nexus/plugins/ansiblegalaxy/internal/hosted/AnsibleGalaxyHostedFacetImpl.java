@@ -172,8 +172,8 @@ public class AnsibleGalaxyHostedFacetImpl
         list.add(getRepository());
         String baseUrlRepo = getRepository().getUrl();
         Iterable<Asset> assets;
-        assets = tx.findAssets(Query.builder().where(P_NAME).like(String.format("%%%s/%s%%", user, module)).build(), list);
-        long count = tx.countAssets(Query.builder().where(P_NAME).like(String.format("%%%s/%s%%", user, module)).build(), list);
+        assets = tx.findAssets(Query.builder().where(P_NAME).like(String.format("%%%s-%s%%", user, module)).build(), list);
+        long count = tx.countAssets(Query.builder().where(P_NAME).like(String.format("%%%s-%s%%", user, module)).build(), list);
 
         AnsibleGalaxyModules releases = moduleBuilder.parse(count, count, 0, context);
         for (Asset asset : assets) {
@@ -199,7 +199,7 @@ public class AnsibleGalaxyHostedFacetImpl
         Iterable<Asset> assets;
         assets = tx.findAssets(Query
                 .builder()
-                .where(P_NAME).like(String.format("%%%s/%s/%s/%%", user, module, version))
+                .where(P_NAME).like(String.format("%%%s-%s%%", user, module, version))
                 .build(), list);
         for (Asset assetX : assets) {
             asset = assetX;
