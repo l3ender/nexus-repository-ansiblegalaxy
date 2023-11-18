@@ -112,18 +112,6 @@ class AnsibleGalaxyHostedRecipe
                 .handler(hostedHandlers.collectionVersionDetail)
                 .create())
 
-        builder.route(new Route.Builder().matcher(collectionArtifactV2Matcher())
-                .handler(timingHandler)
-                .handler(securityHandler)
-                .handler(exceptionHandler)
-                .handler(handlerContributor)
-                .handler(conditionalRequestHandler)
-                .handler(partialFetchHandler)
-                .handler(contentHeadersHandler)
-                .handler(unitOfWorkHandler)
-                .handler(hostedHandlers)
-                .create())
-
         builder.route(new Route.Builder().matcher(collectionArtifactMatcher())
                 .handler(timingHandler)
                 .handler(securityHandler)

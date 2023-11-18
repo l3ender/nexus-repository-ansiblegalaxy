@@ -77,6 +77,13 @@ public class AnsibleGalaxyPathUtils {
         return StringUtils.defaultIfBlank(state.getTokens().get("page_size"), "20");
     }
 
+    public String offset(final TokenMatcher.State state) {
+        return StringUtils.defaultIfBlank(state.getTokens().get("offset"), "0");
+    }
+    public String limit(final TokenMatcher.State state) {
+        return StringUtils.defaultIfBlank(state.getTokens().get("limit"), "100");
+    }
+
     public TokenMatcher.State matcherState(final Context context) {
         State state = context.getAttributes().require(TokenMatcher.State.class);
         log.debug("matched state tokens: {}", state.getTokens());
@@ -110,6 +117,15 @@ public class AnsibleGalaxyPathUtils {
         String page = page(matcherState);
 
         return String.format("%s/%s/%s/versions%s.json", COLLECTION_PATH, author, module, page);
+    }
+
+    public String collectionVersionLimitPath(final State matcherState) {
+        String author = author(matcherState);
+        String module = module(matcherState);
+        String offset = offset(matcherState);
+        String limit = limit(matcherState);
+
+        return String.format("%s/%s/%s/versions-offset-%s-%s.json", COLLECTION_PATH, author, module, offset, limit);
     }
 
     public String roleSearchPath(final State matcherState) {

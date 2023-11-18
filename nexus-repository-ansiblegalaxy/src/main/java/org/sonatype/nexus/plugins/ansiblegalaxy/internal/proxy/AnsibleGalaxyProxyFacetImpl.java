@@ -14,6 +14,9 @@ package org.sonatype.nexus.plugins.ansiblegalaxy.internal.proxy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.eclipse.aether.util.version.GenericVersionScheme;
+import org.eclipse.aether.version.InvalidVersionSpecificationException;
+import org.eclipse.aether.version.Version;
 import org.slf4j.Logger;
 import org.sonatype.goodies.common.Loggers;
 import org.sonatype.nexus.plugins.ansiblegalaxy.AssetKind;
@@ -112,6 +115,8 @@ public class AnsibleGalaxyProxyFacetImpl
                 return getAsset(ansiblegalaxyPathUtils.collectionDetailPath(matcherState));
             case COLLECTION_VERSION_LIST:
                 return getAsset(ansiblegalaxyPathUtils.collectionVersionPagedPath(matcherState));
+            case COLLECTION_VERSION_LIST_LIMIT:
+                return getAsset(ansiblegalaxyPathUtils.collectionVersionLimitPath(matcherState));
             case COLLECTION_VERSION_DETAIL:
                 return getAsset(ansiblegalaxyPathUtils.collectionVersionDetailPath(matcherState));
             case COLLECTION_ARTIFACT:
@@ -152,6 +157,8 @@ public class AnsibleGalaxyProxyFacetImpl
                 return putAsset(context, content, ansiblegalaxyPathUtils.collectionDetailPath(matcherState), assetKind);
             case COLLECTION_VERSION_LIST:
                 return putAsset(context, content, ansiblegalaxyPathUtils.collectionVersionPagedPath(matcherState), assetKind);
+            case COLLECTION_VERSION_LIST_LIMIT:
+                return putAsset(context, content, ansiblegalaxyPathUtils.collectionVersionLimitPath(matcherState), assetKind);
             case COLLECTION_VERSION_DETAIL:
                 return putComponent(context, ansiblegalaxyPathUtils.getCollectionAttributes(matcherState), content,
                         ansiblegalaxyPathUtils.collectionVersionDetailPath(matcherState), assetKind);
@@ -223,11 +230,45 @@ public class AnsibleGalaxyProxyFacetImpl
             }
 
             return new ReplacerStream(replacers).getReplacedContent(in);
+        } else if (assetKind == AssetKind.COLLECTION_VERSION_LIST || assetKind == AssetKind.COLLECTION_VERSION_LIST_LIMIT) {
+
+            List<Replacer> replacers = new ArrayList<>();
+
+            /* API Bug IMHO - https://github.com/ansible/awx/issues/14495 */
+            replacers.add(new JsonPrependReplacer("first", "/repository/" + getRepository().getName()));
+            replacers.add(new JsonPrependReplacer("previous", "/repository/" + getRepository().getName()));
+            replacers.add(new JsonPrependReplacer("last", "/repository/" + getRepository().getName()));
+            replacers.add(new JsonPrependReplacer("next", "/repository/" + getRepository().getName()));
+
+            // If client version < 2.13.9 remove "next" (backward compatibility, reduce options)
+            String userAgent = context.getRequest().getHeaders().get("User-Agent");
+            if (userAgent != null && userAgent.startsWith("ansible-galaxy/")) {
+                if (isUserAgentVersionLowerOrEqual(userAgent, "2.13.9")) {
+                    log.info("Backward compatibility layer in action, mind some versions will be omitted");
+                    replacers.add(new JsonSearchReplacer("next", ""));
+                }
+            }
+
+            return new ReplacerStream(replacers).getReplacedContent(in);
         }
 
         // default: replace all upstream URLs with repo URLs
         SearchReplacer urlReplacer = new SearchReplacer(getRemoteUrl().toString(), getRepository().getUrl() + "/");
         return new ReplacerStream(urlReplacer).getReplacedContent(in);
+    }
+
+    private boolean isUserAgentVersionLowerOrEqual(String userAgent, String targetVersionString) {
+        try {
+            String version = userAgent.split("/")[1];
+            GenericVersionScheme versionScheme = new GenericVersionScheme();
+            Version userAgentVersion = versionScheme.parseVersion(version);
+            Version targetVersion = versionScheme.parseVersion(targetVersionString);
+
+            return userAgentVersion.compareTo(targetVersion) <= 0;
+        } catch (InvalidVersionSpecificationException e) {
+            log.info("isUserAgentVersionLowerOrEqual returns an error ({} vs {}), assuming false", userAgent, targetVersionString);
+            return false;
+        }
     }
 
     private String getModuleName(Context context) {
