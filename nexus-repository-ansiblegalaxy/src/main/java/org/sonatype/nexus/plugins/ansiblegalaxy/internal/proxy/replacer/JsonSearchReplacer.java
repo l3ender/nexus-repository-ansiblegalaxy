@@ -32,8 +32,17 @@ public class JsonSearchReplacer
         this.replace = checkNotNull(replace);
     }
 
+    public JsonSearchReplacer(String jsonFieldName, String replace) {
+        super(jsonFieldName);
+        this.search = null;
+        this.replace = checkNotNull(replace);
+    }
+
     @Override
     protected String getUpdatedContent(JsonNode field) {
+        if (search == null) {
+            return replace;
+        }
         return field.asText().replaceAll(search, replace);
     }
 

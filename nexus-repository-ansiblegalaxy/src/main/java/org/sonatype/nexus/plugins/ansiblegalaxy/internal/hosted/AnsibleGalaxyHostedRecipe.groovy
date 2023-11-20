@@ -112,7 +112,6 @@ class AnsibleGalaxyHostedRecipe
                 .handler(hostedHandlers.collectionVersionDetail)
                 .create())
 
-
         builder.route(new Route.Builder().matcher(collectionArtifactMatcher())
                 .handler(timingHandler)
                 .handler(securityHandler)
