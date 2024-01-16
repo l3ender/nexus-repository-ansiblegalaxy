@@ -151,6 +151,14 @@ abstract class AnsibleGalaxyRecipeSupport
                 setAssetKind(AssetKind.COLLECTION_VERSION_LIST)
         )
     }
+    // /api/v3/plugin/ansible/content/published/collections/index/ansible/netcommon/versions/
+    static Matcher collectionVersionListMatcherPages() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
+                new QueryTokenMatcher("/api/{apiversion}/plugin/ansible/content/published/collections/index/{author}/{module}/versions/", [limit: "limit", offset: "offset"]),
+                setAssetKind(AssetKind.COLLECTION_VERSION_LIST_LIMIT)
+        )
+    }
 
     static Matcher collectionVersionDetailMatcher() {
         LogicMatchers.and(
@@ -163,15 +171,25 @@ abstract class AnsibleGalaxyRecipeSupport
     static Matcher collectionArtifactMatcher() {
         LogicMatchers.and(
                 new ActionMatcher(GET, HEAD),
+                new TokenMatcher("/api/{apiversion}/plugin/ansible/content/published/collections/artifacts/{author}-{module}-{version}.tar.gz"),
+                setAssetKind(AssetKind.COLLECTION_ARTIFACT)
+        )
+    }
+
+    static Matcher collectionArtifactV2Matcher() {
+        LogicMatchers.and(
+                new ActionMatcher(GET, HEAD),
                 new TokenMatcher("/download/{author}-{module}-{version}.tar.gz"),
                 setAssetKind(AssetKind.COLLECTION_ARTIFACT)
         )
     }
 
+    // https://repo.angeloxx.lan/repository/galaxy/api/v3/plugin/ansible/content/published/collections/artifacts/telekom_mms-icinga_director-1.34.1.tar.gz
+    // /api/v3/plugin/ansible/content/published/collections/artifacts/telekom_mms-icinga_director-1.34.1.tar.gz
     static Matcher collectionArtifactIhmMatcher() {
         LogicMatchers.and(
                 new ActionMatcher(GET, HEAD),
-                new TokenMatcher("/collection/{author}/{module}/{version}/{author}-{module}-{version}.tar.gz"),
+                new TokenMatcher("/api/{apiversion}/plugin/ansible/content/published/collections/artifacts/{author}-{module}-{version}.tar.gz"),
                 setAssetKind(AssetKind.COLLECTION_ARTIFACT)
         )
     }

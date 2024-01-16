@@ -126,7 +126,7 @@ public class AnsibleGalaxyPathUtilsTest
   public void collectionArtifactPath() {
     String result = underTest.collectionArtifactPath(state);
 
-    assertThat(result, is(equalTo("collection/azure/azcollection/1.2.0/azure-azcollection-1.2.0.tar.gz")));
+    assertThat(result, is(equalTo("api/v3/plugin/ansible/content/published/collections/artifacts/azure-azcollection-1.2.0.tar.gz")));
   }
 
   @Test

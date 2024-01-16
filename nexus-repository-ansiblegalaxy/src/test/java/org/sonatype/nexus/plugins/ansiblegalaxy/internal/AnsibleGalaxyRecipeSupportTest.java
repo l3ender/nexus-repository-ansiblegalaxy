@@ -60,7 +60,7 @@ public class AnsibleGalaxyRecipeSupportTest
 
   @Test
   public void testCollectionArtifactTar() {
-    when(request.getPath()).thenReturn("/download/azure-azcollection-1.3.1.tar.gz");
+    when(request.getPath()).thenReturn("/api/v3/plugin/ansible/content/published/collections/artifacts/azure-azcollection-1.3.1.tar.gz");
     Matcher matcher = collectionArtifactMatcher();
     boolean matches = matcher.matches(context);
     assertTrue(matches);
@@ -76,7 +76,7 @@ public class AnsibleGalaxyRecipeSupportTest
 
   @Test
   public void testCollectionBranchArtifactTar() {
-    when(request.getPath()).thenReturn("/download/azure-azcollection-master.tar.gz");
+    when(request.getPath()).thenReturn("/api/v3/plugin/ansible/content/published/collections/artifacts/azure-azcollection-master.tar.gz");
     Matcher matcher = collectionArtifactMatcher();
     boolean matches = matcher.matches(context);
     assertTrue(matches);

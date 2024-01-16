@@ -77,6 +77,13 @@ public class AnsibleGalaxyPathUtils {
         return StringUtils.defaultIfBlank(state.getTokens().get("page_size"), "20");
     }
 
+    public String offset(final TokenMatcher.State state) {
+        return StringUtils.defaultIfBlank(state.getTokens().get("offset"), "0");
+    }
+    public String limit(final TokenMatcher.State state) {
+        return StringUtils.defaultIfBlank(state.getTokens().get("limit"), "100");
+    }
+
     public TokenMatcher.State matcherState(final Context context) {
         State state = context.getAttributes().require(TokenMatcher.State.class);
         log.debug("matched state tokens: {}", state.getTokens());
@@ -110,6 +117,15 @@ public class AnsibleGalaxyPathUtils {
         String page = page(matcherState);
 
         return String.format("%s/%s/%s/versions%s.json", COLLECTION_PATH, author, module, page);
+    }
+
+    public String collectionVersionLimitPath(final State matcherState) {
+        String author = author(matcherState);
+        String module = module(matcherState);
+        String offset = offset(matcherState);
+        String limit = limit(matcherState);
+
+        return String.format("%s/%s/%s/versions-offset-%s-%s.json", COLLECTION_PATH, author, module, offset, limit);
     }
 
     public String roleSearchPath(final State matcherState) {
@@ -156,11 +172,15 @@ public class AnsibleGalaxyPathUtils {
 
     public String download(String baseUrlRepo, final String author, final String module, final String version) {
 
-        return String.format("%s/download/%s.tar.gz", baseUrlRepo, author + "-" + module + "-" + version);
+        return String.format("%s/api/v3/plugin/ansible/content/published/collections/artifacts/%s.tar.gz", baseUrlRepo, author + "-" + module + "-" + version);
     }
 
     public String collectionArtifactPath(final State matcherState) {
-        return String.format("%s/%s", COLLECTION_PATH, artifactPath(matcherState));
+        String author = author(matcherState);
+        String module = module(matcherState);
+        String version = version(matcherState);
+        //return String.format("%s/%s", COLLECTION_PATH, artifactPath(matcherState));
+        return String.format("api/v3/plugin/ansible/content/published/collections/artifacts/%s-%s-%s.tar.gz", author, module, version);
     }
 
     public String parseHref(String baseUrlRepo, final String name, final String version) {
@@ -169,7 +189,8 @@ public class AnsibleGalaxyPathUtils {
     }
 
     public String collectionArtifactPath(final String author, final String module, final String version) {
-        return String.format("%s/%s", COLLECTION_PATH, artifactPath(author, module, version));
+        // return String.format("%s/%s", COLLECTION_PATH, artifactPath(author, module, version));
+        return String.format("api/v3/plugin/ansible/content/published/collections/artifacts/%s-%s-%s.tar.gz", author, module, version);
     }
 
     public String collectionNamePath(final String author, final String module) {
